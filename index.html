@@ -33,10 +33,13 @@
         .login-btn-secondary { background: #1D2939; color: #fff; box-shadow: 0 4px 16px rgba(29,41,57,0.3); margin-top: 10px; }
         .login-btn-secondary:hover { background: #344054; transform: translateY(-1px); }
         .login-btn-secondary:active { transform: translateY(0); }
-        .login-error { font-size: 0.8rem; color: #D92D20; margin-top: 10px; min-height: 20px; }
-        .login-toggle { font-size: 0.8rem; color: #667085; margin-top: 16px; cursor: pointer; }
-        .login-toggle:hover { color: #0A7AC2; }
-        .login-toggle strong { color: #0A7AC2; }
+        .login-msg { font-size: 0.8rem; margin-top: 10px; min-height: 20px; }
+        .login-msg.error { color: #D92D20; }
+        .login-msg.success { color: #065F46; background: #D1FAE5; padding: 8px 12px; border-radius: 8px; }
+        .login-link { font-size: 0.82rem; color: #667085; margin-top: 20px; }
+        .login-link span { color: #0A7AC2; font-weight: 600; cursor: pointer; text-decoration: underline; }
+        .login-link span:hover { color: #0596D5; }
+        .login-card.hidden { display: none; }
 
         /* ===================== */
         /* Map App               */
@@ -186,22 +189,39 @@
 <body>
     <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
-        <div class="login-card">
+        <div class="login-card" id="login-card">
             <div class="login-logo">C</div>
-            <div class="login-title">Cafe Map</div>
-
-            <div class="login-field">
+            <div class="login-title">ログイン</div>
+            <div class="login-field" style="margin-top:24px;">
                 <label>メールアドレス</label>
                 <input type="email" id="login-email" placeholder="example@email.com">
             </div>
             <div class="login-field">
                 <label>パスワード</label>
-                <input type="password" id="login-password" placeholder="6文字以上">
+                <input type="password" id="login-password" placeholder="パスワードを入力">
             </div>
-            <div class="login-error" id="login-error"></div>
+            <div class="login-msg" id="login-msg"></div>
             <button class="login-btn login-btn-primary" id="btn-login">ログイン</button>
-            <button class="login-btn login-btn-secondary" id="btn-signup">新規アカウントを作成</button>
-            <div class="login-toggle" id="login-toggle"></div>
+            <div class="login-link">アカウントをお持ちでない方は <span id="goto-signup">新規登録</span></div>
+        </div>
+        <div class="login-card hidden" id="signup-card">
+            <div class="login-logo">C</div>
+            <div class="login-title">新規アカウント作成</div>
+            <div class="login-field" style="margin-top:24px;">
+                <label>メールアドレス</label>
+                <input type="email" id="signup-email" placeholder="example@email.com">
+            </div>
+            <div class="login-field">
+                <label>パスワード</label>
+                <input type="password" id="signup-password" placeholder="6文字以上のパスワード">
+            </div>
+            <div class="login-field">
+                <label>パスワード（確認）</label>
+                <input type="password" id="signup-password-confirm" placeholder="もう一度パスワードを入力">
+            </div>
+            <div class="login-msg" id="signup-msg"></div>
+            <button class="login-btn login-btn-primary" id="btn-signup">アカウントを作成</button>
+            <div class="login-link">すでにアカウントをお持ちの方は <span id="goto-login">ログイン</span></div>
         </div>
     </div>
 
@@ -358,8 +378,10 @@
             if (el) el.remove();
         }
 
-        function setLoginError(msg) {
-            $('login-error').textContent = msg;
+        function setLoginMsg(id, msg, type) {
+            const el = $(id);
+            el.textContent = msg;
+            el.className = 'login-msg ' + (type || '');
         }
 
         function switchToApp(user) {
@@ -381,7 +403,13 @@
             $('app-screen').classList.remove('active');
             $('login-email').value = '';
             $('login-password').value = '';
-            setLoginError('');
+            $('signup-email').value = '';
+            $('signup-password').value = '';
+            $('signup-password-confirm').value = '';
+            setLoginMsg('login-msg', '');
+            setLoginMsg('signup-msg', '');
+            $('login-card').classList.remove('hidden');
+            $('signup-card').classList.add('hidden');
         }
 
         async function loadFromSupabase() {
@@ -665,24 +693,43 @@
         });
 
         // --- Auth ---
+        $('goto-signup').addEventListener('click', () => {
+            setLoginMsg('login-msg', '');
+            $('login-card').classList.add('hidden');
+            $('signup-card').classList.remove('hidden');
+        });
+
+        $('goto-login').addEventListener('click', () => {
+            setLoginMsg('signup-msg', '');
+            $('signup-card').classList.add('hidden');
+            $('login-card').classList.remove('hidden');
+        });
+
         $('btn-login').addEventListener('click', async () => {
-            setLoginError('');
+            setLoginMsg('login-msg', '');
             const email = $('login-email').value.trim();
             const password = $('login-password').value;
-            if (!email || !password) { setLoginError('メールアドレスとパスワードを入力してください'); return; }
+            if (!email || !password) { setLoginMsg('login-msg', 'メールアドレスとパスワードを入力してください', 'error'); return; }
+            setLoginMsg('login-msg', 'ログイン中...', '');
             const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) { setLoginError(error.message); return; }
+            if (error) { setLoginMsg('login-msg', error.message, 'error'); return; }
         });
 
         $('btn-signup').addEventListener('click', async () => {
-            setLoginError('');
-            const email = $('login-email').value.trim();
-            const password = $('login-password').value;
-            if (!email || !password) { setLoginError('メールアドレスとパスワードを入力してください'); return; }
-            if (password.length < 6) { setLoginError('パスワードは6文字以上で設定してください'); return; }
+            setLoginMsg('signup-msg', '');
+            const email = $('signup-email').value.trim();
+            const password = $('signup-password').value;
+            const confirm = $('signup-password-confirm').value;
+            if (!email || !password) { setLoginMsg('signup-msg', 'メールアドレスとパスワードを入力してください', 'error'); return; }
+            if (password.length < 6) { setLoginMsg('signup-msg', 'パスワードは6文字以上で設定してください', 'error'); return; }
+            if (password !== confirm) { setLoginMsg('signup-msg', 'パスワードが一致しません', 'error'); return; }
+            setLoginMsg('signup-msg', 'アカウントを作成中...', '');
             const { error } = await supabase.auth.signUp({ email, password });
-            if (error) { setLoginError(error.message); return; }
-            setLoginError('アカウントを作成しました！ログインしてください。');
+            if (error) { setLoginMsg('signup-msg', error.message, 'error'); return; }
+            setLoginMsg('signup-msg', 'アカウントを作成しました！ログイン画面に戻ってログインしてください。', 'success');
+            $('signup-email').value = '';
+            $('signup-password').value = '';
+            $('signup-password-confirm').value = '';
         });
 
         $('btn-logout').addEventListener('click', async () => {
@@ -692,6 +739,7 @@
 
         $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
         $('login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
+        $('signup-password-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-signup').click(); });
 
         supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
