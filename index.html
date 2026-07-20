@@ -147,6 +147,49 @@
         .popup-btn-del{background:#FEE4E2;color:#D92D20}.popup-btn-del:hover{background:#FECDCA}
         .leaflet-control-attribution{font-size:10px!important}
         .view{display:none}.view.active{display:block}
+
+        .list-filter{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;flex-shrink:0}
+        .list-filter::-webkit-scrollbar{display:none}
+        .list-filter-chip{flex-shrink:0;padding:5px 12px;border-radius:8px;border:1.5px solid #E4E7EC;background:#fff;font-size:.72rem;font-weight:600;font-family:inherit;color:#667085;cursor:pointer;transition:all .15s;white-space:nowrap}
+        .list-filter-chip.active{border-color:#0A7AC2;color:#0A7AC2;background:#F0F7FF}
+        .list-filter-chip:hover{border-color:#0A7AC2;background:#F8FBFF}
+        .list-sort{display:flex;gap:6px;margin-bottom:10px;flex-shrink:0}
+        .list-sort-btn{padding:5px 12px;border-radius:8px;border:1.5px solid #E4E7EC;background:#fff;font-size:.72rem;font-weight:600;font-family:inherit;color:#667085;cursor:pointer;transition:all .15s}
+        .list-sort-btn.active{border-color:#0A7AC2;color:#0A7AC2;background:#F0F7FF}
+        .list-sort-btn:hover{border-color:#0A7AC2;background:#F8FBFF}
+
+        .cafe-card{border:1.5px solid #E4E7EC;border-radius:12px;margin-bottom:8px;background:#fff;transition:all .2s;overflow:hidden}
+        .cafe-card:hover{border-color:#0A7AC2;box-shadow:0 2px 8px rgba(10,122,194,.1)}
+        .cafe-card-head{padding:12px 14px;cursor:pointer;transition:background .15s}
+        .cafe-card-head:hover{background:#F8FBFF}
+        .cafe-card-name-row{display:flex;align-items:center;gap:8px}
+        .cafe-card-status{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:6px;flex-shrink:0;letter-spacing:.02em}
+        .cafe-card-status.open{background:#D1FAE5;color:#065F46}
+        .cafe-card-status.closed{background:#FEE2E2;color:#991B1B}
+        .cafe-card-status.unknown{background:#F2F4F7;color:#98A2B3}
+        .cafe-card-name{font-size:.88rem;font-weight:600;color:#1D2939;flex:1;min-width:0}
+        .cafe-card-addr{font-size:.75rem;color:#667085;margin-top:3px;line-height:1.3}
+        .cafe-card-meta{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+        .cafe-card-tag{font-size:.65rem;padding:2px 7px;border-radius:5px;font-weight:500}
+        .cafe-card-tag.yes{background:#D1FAE5;color:#065F46}
+        .cafe-card-tag.no{background:#FEE2E2;color:#991B1B}
+        .cafe-card-tag.unknown{background:#F2F4F7;color:#98A2B3}
+        .cafe-card-expand{font-size:.68rem;color:#0A7AC2;font-weight:600;margin-top:6px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;transition:color .15s}
+        .cafe-card-expand:hover{color:#0596D5}
+
+        .cafe-card-details{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.32,.72,0,1),padding .25s;padding:0 14px}
+        .cafe-card-details.open{max-height:500px;padding:0 14px 14px}
+        .cafe-card-detail-divider{height:1px;background:#E4E7EC;margin-bottom:10px}
+        .cafe-card-comment{font-size:.82rem;color:#344054;line-height:1.5;margin-bottom:10px;padding:8px 10px;background:#F9FAFB;border-radius:8px;border-left:3px solid #0A7AC2}
+        .cafe-card-info-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+        .cafe-card-info-item{font-size:.75rem;color:#667085;display:flex;align-items:center;gap:4px}
+        .cafe-card-info-item .icon{font-size:.85rem}
+        .cafe-card-actions{display:flex;flex-wrap:wrap;gap:6px}
+        .cafe-card-action{padding:7px 12px;border-radius:8px;border:1px solid #E4E7EC;background:#fff;font-size:.72rem;font-weight:600;font-family:inherit;cursor:pointer;color:#0A7AC2;transition:all .15s;display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+        .cafe-card-action:hover{background:#F0F7FF;border-color:#0A7AC2}
+        .cafe-card-action.danger{color:#D92D20;border-color:#FECACA}
+        .cafe-card-action.danger:hover{background:#FEF2F2}
+
         @media(max-width:768px){.panel-left,.panel-right{width:calc(100vw - 24px)}.panel-right{right:12px}.fab{bottom:16px;right:16px}}
     </style>
 </head>
@@ -236,13 +279,28 @@
         const SUPABASE_KEY='sb_publishable_1hTi4qYLdb2CC4fqOyCiiw_VJNO5n6j';
         const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-        let cafes=[],markers=[],map,currentCafeId=null,currentUser=null,mapInitialized=false,currentTab='list',feedSort='newest';
+        let cafes=[],markers=[],map,currentCafeId=null,currentUser=null,mapInitialized=false,currentTab='list',feedSort='newest',listFilter=null,listSort='newest',expandedCafeId=null;
         const $=id=>document.getElementById(id);
 
         function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
         function showLoading(){let el=document.getElementById('loading-overlay');if(!el){el=document.createElement('div');el.id='loading-overlay';el.className='loading-overlay';el.innerHTML='<div class="loading-spinner"></div>';document.body.appendChild(el)}}
         function hideLoading(){const el=document.getElementById('loading-overlay');if(el)el.remove()}
         function timeAgo(date){const s=Math.floor((Date.now()-new Date(date))/1000);if(s<60)return'たった今';if(s<3600)return Math.floor(s/60)+'分前';if(s<86400)return Math.floor(s/3600)+'時間前';return Math.floor(s/86400)+'日前'}
+        function isCafeOpen(hours){
+            if(!hours)return'unknown';
+            const now=new Date();const day=now.getDay();const h=now.getHours();const m=now.getMinutes();const cur=h*60+m;
+            const parts=hours.replace(/[～~〜]/g,'-').split('/').map(s=>s.trim());
+            for(const part of parts){
+                const match=part.match(/(\d{1,2}):(\d{2})\s*[-ー]\s*(\d{1,2}):(\d{2})/);
+                if(!match)continue;
+                const open=parseInt(match[1])*60+parseInt(match[2]);
+                const close=parseInt(match[3])*60+parseInt(match[4]);
+                if(close<open){if(cur>=open||cur<close)return'open'}
+                else{if(cur>=open&&cur<close)return'open'}
+            }
+            return'closed';
+        }
+        function getGoogleSearchUrl(cafe){return'https://www.google.com/search?q='+encodeURI((cafe.name||'')+' '+(cafe.address||'')+' カ페')}
 
         function switchToApp(user){currentUser=user;$('login-screen').classList.add('hidden');$('app-screen').classList.add('active');$('avatar-btn').textContent=user.email.charAt(0);$('dropdown-email').textContent=user.email;if(!mapInitialized){initMap();mapInitialized=true}loadFromSupabase()}
         function switchToLogin(){currentUser=null;$('login-screen').classList.remove('hidden');$('app-screen').classList.remove('active');$('login-email').value='';$('login-password').value='';$('signup-email').value='';$('signup-password').value='';$('signup-password-confirm').value='';setMsg('login-msg','');setMsg('signup-msg','');$('login-card').classList.remove('hidden');$('signup-card').classList.add('hidden')}
@@ -254,7 +312,70 @@
 
         function renderCurrentView(){if(currentTab==='list')renderList();else if(currentTab==='feed')renderFeed()}
 
-        function renderList(){$('view-list').innerHTML=cafes.length===0?'<p class="empty-msg">カフェを登録してください</p>':cafes.map(c=>{const t=[];if(c.wifi===true)t.push('Wifi');if(c.power===true)t.push('電源');if(c.parking===true)t.push('駐車場');return`<div class="cafe-card" data-id="${c.id}"><div class="cafe-card-name">${esc(c.name)}</div><div class="cafe-card-addr">${esc(c.address||'')}</div>${t.length?`<div class="cafe-card-meta">${t.map(x=>`<span class="cafe-card-tag">${x}</span>`).join('')}</div>`:''}</div>`}).join('');$('view-list').querySelectorAll('.cafe-card').forEach(c=>c.addEventListener('click',()=>{const id=Number(c.dataset.id);openThread(id)}))}
+        function renderList(){
+            let filtered=[...cafes];
+            if(listFilter==='wifi')filtered=filtered.filter(c=>c.wifi===true);
+            else if(listFilter==='power')filtered=filtered.filter(c=>c.power===true);
+            else if(listFilter==='parking')filtered=filtered.filter(c=>c.parking===true);
+
+            if(listSort==='newest')filtered.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+            else if(listSort==='popular')filtered.sort((a,b)=>(b.like_count||0)-(a.like_count||0));
+            else if(listSort==='name')filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ja'));
+
+            const filterHtml=`<div class="list-filter"><button class="list-filter-chip ${!listFilter?'active':''}" onclick="setListFilter(null)">すべて</button><button class="list-filter-chip ${listFilter==='wifi'?'active':''}" onclick="setListFilter('wifi')">📶 Wifi</button><button class="list-filter-chip ${listFilter==='power'?'active':''}" onclick="setListFilter('power')">🔌 電源</button><button class="list-filter-chip ${listFilter==='parking'?'active':''}" onclick="setListFilter('parking')">🅿️ 駐車場</button></div>`;
+            const sortHtml=`<div class="list-sort"><button class="list-sort-btn ${listSort==='newest'?'active':''}" onclick="setListSort('newest')">🕐 新しい順</button><button class="list-sort-btn ${listSort==='popular'?'active':''}" onclick="setListSort('popular')">👍 いいね順</button><button class="list-sort-btn ${listSort==='name'?'active':''}" onclick="setListSort('name')">あいうえお順</button></div>`;
+
+            if(filtered.length===0){$('view-list').innerHTML=filterHtml+sortHtml+'<p class="empty-msg">カフェがありません</p>';return}
+
+            const cardsHtml=filtered.map(c=>{
+                const openStatus=isCafeOpen(c.hours);
+                const statusClass=openStatus==='open'?'open':openStatus==='closed'?'closed':'unknown';
+                const statusText=openStatus==='open'?'営業中':openStatus==='closed'?'閉店':'不明';
+                const expanded=expandedCafeId===c.id;
+
+                const tags=[];
+                if(c.wifi===true)tags.push('<span class="cafe-card-tag yes">Wifi あり</span>');
+                else if(c.wifi===false)tags.push('<span class="cafe-card-tag no">Wifi なし</span>');
+                if(c.power===true)tags.push('<span class="cafe-card-tag yes">電源 あり</span>');
+                else if(c.power===false)tags.push('<span class="cafe-card-tag no">電源 なし</span>');
+                if(c.parking===true)tags.push('<span class="cafe-card-tag yes">駐車場 あり</span>');
+                else if(c.parking===false)tags.push('<span class="cafe-card-tag no">駐車場 なし</span>');
+
+                return`<div class="cafe-card" data-id="${c.id}">
+                    <div class="cafe-card-head" onclick="toggleCafeCard(${c.id})">
+                        <div class="cafe-card-name-row">
+                            <span class="cafe-card-status ${statusClass}">${statusText}</span>
+                            <span class="cafe-card-name">${esc(c.name)}</span>
+                        </div>
+                        <div class="cafe-card-addr">${esc(c.address||'')}</div>
+                        ${tags.length?`<div class="cafe-card-meta">${tags.join('')}</div>`:''}
+                        <div class="cafe-card-expand">${expanded?'▲ 詳細を閉じる':'▼ 詳細を見る'}</div>
+                    </div>
+                    <div class="cafe-card-details ${expanded?'open':''}">
+                        <div class="cafe-card-detail-divider"></div>
+                        ${c.comment?`<div class="cafe-card-comment">${esc(c.comment)}</div>`:''}
+                        <div class="cafe-card-info-row">
+                            ${c.hours?`<span class="cafe-card-info-item"><span class="icon">🕐</span>${esc(c.hours)}</span>`:''}
+                            <span class="cafe-card-info-item"><span class="icon">👍</span>${c.like_count||0}いいね</span>
+                            <span class="cafe-card-info-item"><span class="icon">📍</span>${c.lat.toFixed(4)}, ${c.lng.toFixed(4)}</span>
+                        </div>
+                        <div class="cafe-card-actions">
+                            <button class="cafe-card-action" onclick="event.stopPropagation();jumpToCafe(${c.id})">📍 地図で見る</button>
+                            <a class="cafe-card-action" href="${getGoogleSearchUrl(c)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔍 Google検索</a>
+                            <button class="cafe-card-action" onclick="event.stopPropagation();openThread(${c.id})">💬 スレッド</button>
+                            ${currentUser?`<button class="cafe-card-action" onclick="event.stopPropagation();editCafe(${c.id})">✏️ 編集</button>`:''}
+                            ${currentUser?`<button class="cafe-card-action danger" onclick="event.stopPropagation();deleteCafe(${c.id})">🗑️ 削除</button>`:''}
+                        </div>
+                    </div>
+                </div>`
+            }).join('');
+
+            $('view-list').innerHTML=filterHtml+sortHtml+cardsHtml;
+        }
+
+        window.toggleCafeCard=function(id){expandedCafeId=expandedCafeId===id?null:id;renderList()};
+        window.setListFilter=function(f){listFilter=f;expandedCafeId=null;renderList()};
+        window.setListSort=function(s){listSort=s;expandedCafeId=null;renderList()};
 
         async function renderFeed(){
             const allComments=await loadAllComments();
