@@ -442,6 +442,30 @@
         $('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-login').click()});
         $('signup-password-confirm').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-signup').click()});
 
+        // ブラウザコンソールから実行: window.addSampleCafes()
+        window.addSampleCafes=async function(){
+            if(!currentUser){alert('ログインしてください');return}
+            const cafes=[
+                {name:'Blue Bottle Coffee 渋谷',address:'東京都渋谷区渋谷1-14-1',lat:35.6613,lng:139.6982,comment:'人気のスペシャリティコーヒー店',hours:'8:00-21:00',wifi:true,power:false,parking:false},
+                {name:'JINNAN CAFE 渋谷',address:'東京都渋谷区神南1-17-5',lat:35.6612,lng:139.6962,comment:'隠れ家カフェ。150席のゆったり空間',hours:'9:00-23:00',wifi:true,power:true,parking:false},
+                {name:'SMITH TEAMAKER 渋谷',address:'渋谷スクランブルスクエア4F',lat:35.6580,lng:139.7016,comment:'上質なティーブランドのフラッグシップ',hours:'10:00-21:00',wifi:true,power:false,parking:false},
+                {name:'スターバックス 渋谷センター街',address:'東京都渋谷区宇田川町21-6',lat:35.6615,lng:139.6985,comment:'渋谷の中心にある人気店',hours:'7:00-23:00',wifi:true,power:true,parking:false},
+                {name:'ドトールコーヒー 渋谷道玄坂',address:'東京都渋谷区道玄坂1-1-5',lat:35.6562,lng:139.6938,comment:'道玄坂の角にある定番カフェ',hours:'8:00-22:00',wifi:true,power:false,parking:false},
+                {name:'Blue Bottle Coffee NEWoMan新宿',address:'東京都新宿区新宿4-1-6 NEWoMan',lat:35.6896,lng:139.6999,comment:'NEWoMan内のブルーボトル',hours:'8:00-21:30',wifi:true,power:false,parking:false},
+                {name:'Paul Bassett 新宿',address:'東京都新宿区西新宿1-3-1 野村ビルB1',lat:35.6910,lng:139.6980,comment:'バリスタ世界チャンピオン直営',hours:'8:00-21:00',wifi:true,power:true,parking:false},
+                {name:'スターバックス リザーブ 新宿マルイ',address:'東京都新宿区新宿3-30-13 新宿マルイ本館2F',lat:35.6917,lng:139.7020,comment:'リザーブ専門店。コルネッティが名物',hours:'7:00-22:30',wifi:true,power:false,parking:false},
+                {name:'Brooklyn Parlor 新宿',address:'東京都新宿区新宿3-1-25 新宿マルイアネックスB1F',lat:35.6910,lng:139.7025,comment:'ブルーノート監修のブックカフェ',hours:'12:00-23:00',wifi:true,power:true,parking:false},
+                {name:'CAFE AALIYA 新宿三丁目',address:'東京都新宿区新宿3-26-12',lat:35.6890,lng:139.7010,comment:'フレンチトーストが絶品の百名店',hours:'10:00-20:00',wifi:false,power:false,parking:false},
+                {name:'珈琲西武 本店',address:'東京都新宿区西武新宿1-11-1',lat:35.6892,lng:139.6990,comment:'昭和レトロな老舗喫茶。特大パフェが名物',hours:'9:00-21:00',wifi:false,power:false,parking:false},
+                {name:'ブルーボトルコーヒー 中目黒',address:'東京都目黒区中目黒1-17-1',lat:35.6443,lng:139.7025,comment:'中目黒の本店',hours:'8:00-20:00',wifi:true,power:false,parking:false}
+            ];
+            cafes.forEach(c=>c.user_id=currentUser.id);
+            const{error}=await supabase.from('cafes').insert(cafes);
+            if(error){alert('追加エラー: '+error.message);return}
+            await loadFromSupabase();
+            alert(cafes.length+'件のカフェを追加しました！');
+        }
+
         supabase.auth.onAuthStateChange((e,s)=>{if(s?.user)switchToApp(s.user);else switchToLogin()});
         const{data:{session}}=await supabase.auth.getSession();
         if(session?.user)switchToApp(session.user);else switchToLogin();
