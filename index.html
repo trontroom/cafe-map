@@ -11,8 +11,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; overflow: hidden; }
 
-        #header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); z-index: 1002; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 12px rgba(10,122,194,0.3); }
+        #header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); z-index: 1002; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 12px rgba(10,122,194,0.3); }
         #header h1 { font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+
+        /* --- Auth Bar --- */
+        .auth-bar { display: flex; align-items: center; gap: 8px; }
+        .auth-bar input { padding: 6px 10px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; font-size: 0.78rem; font-family: inherit; background: rgba(255,255,255,0.15); color: #fff; width: 150px; }
+        .auth-bar input::placeholder { color: rgba(255,255,255,0.7); }
+        .auth-bar input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,0.25); }
+        .auth-btn { padding: 6px 12px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); color: #fff; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+        .auth-btn:hover { background: rgba(255,255,255,0.3); }
+        .auth-email { color: #fff; font-size: 0.8rem; font-weight: 500; }
+        .auth-logged-in { display: none; }
+        .auth-logged-out { display: flex; }
 
         #map { position: fixed; top: 52px; left: 0; width: 100%; height: calc(100% - 52px); z-index: 1; }
 
@@ -25,6 +36,7 @@
         .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 16px; border: none; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; cursor: pointer; z-index: 1000; box-shadow: 0 4px 20px rgba(10,122,194,0.4); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
         .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(10,122,194,0.5); }
         .fab:active { transform: scale(0.95); }
+        .fab.hidden { display: none; }
 
         /* --- Panel Base --- */
         .panel { position: fixed; top: 12px; bottom: 12px; background: #fff; border-radius: 16px; z-index: 1001; box-shadow: 0 8px 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; }
@@ -136,16 +148,32 @@
             .panel-left, .panel-right { width: calc(100vw - 24px); }
             .panel-right { right: 12px; }
             .fab { bottom: 16px; right: 16px; }
+            .auth-bar input { width: 110px; }
+            .auth-bar { gap: 4px; }
         }
     </style>
 </head>
 <body>
-    <div id="header"><h1>Cafe Map</h1></div>
+    <div id="header">
+        <h1>Cafe Map</h1>
+        <div class="auth-bar">
+            <div class="auth-logged-out" id="auth-logged-out">
+                <input type="email" id="auth-email" placeholder="メールアドレス">
+                <input type="password" id="auth-password" placeholder="パスワード">
+                <button class="auth-btn" id="btn-signup">新規登録</button>
+                <button class="auth-btn" id="btn-login">ログイン</button>
+            </div>
+            <div class="auth-logged-in" id="auth-logged-in">
+                <span class="auth-email" id="auth-display-email"></span>
+                <button class="auth-btn" id="btn-logout">ログアウト</button>
+            </div>
+        </div>
+    </div>
     <div id="map"></div>
 
     <button class="panel-tab" id="panel-tab" title="一覧を展開">&#9654;</button>
 
-    <button class="fab" id="fab-add" title="カフェを追加">+</button>
+    <button class="fab hidden" id="fab-add" title="カフェを追加">+</button>
 
     <!-- Left Panel: Cafe List -->
     <div class="panel panel-left open" id="panel-left">
@@ -162,7 +190,7 @@
                 <div class="detail-tags" id="detail-tags"></div>
                 <div class="detail-like" id="detail-like"></div>
                 <div class="detail-comments" id="detail-comments"></div>
-                <div class="btn-group">
+                <div class="btn-group" id="detail-btns">
                     <button class="btn btn-secondary" id="detail-back">← 一覧</button>
                     <button class="btn btn-primary" id="detail-edit">編集</button>
                     <button class="btn btn-danger" id="detail-delete">削除</button>
@@ -253,6 +281,7 @@
         let markers = [];
         let map;
         let currentCafeId = null;
+        let currentUser = null;
 
         const $ = id => document.getElementById(id);
 
@@ -279,6 +308,23 @@
             if (el) el.remove();
         }
 
+        function updateAuthUI(user) {
+            currentUser = user;
+            if (user) {
+                $('auth-logged-out').style.display = 'none';
+                $('auth-logged-in').style.display = 'flex';
+                $('auth-display-email').textContent = user.email;
+                $('fab-add').classList.remove('hidden');
+                document.querySelectorAll('.popup-btns, .popup-like, .popup-comment-form').forEach(el => el.style.display = '');
+                document.querySelectorAll('.popup-like-btn, .popup-comment-btn, .popup-btn-edit, .popup-btn-del').forEach(el => el.style.pointerEvents = '');
+            } else {
+                $('auth-logged-out').style.display = 'flex';
+                $('auth-logged-in').style.display = 'none';
+                $('auth-display-email').textContent = '';
+                $('fab-add').classList.add('hidden');
+            }
+        }
+
         async function loadFromSupabase() {
             const { data, error } = await supabase.from('cafes').select('*').order('created_at', { ascending: true });
             if (error) { console.error('Supabase load error:', error); return; }
@@ -294,6 +340,7 @@
         }
 
         window.likeCafe = async function(cafeId) {
+            if (!currentUser) return;
             cafeId = Number(cafeId);
             const cafe = cafes.find(c => c.id === cafeId);
             if (!cafe) return;
@@ -301,10 +348,7 @@
             const { error } = await supabase.from('cafes').update({ like_count: newCount }).eq('id', cafeId);
             if (error) { console.error('Like error:', error); return; }
             await loadFromSupabase();
-            const marker = markers.find(m => {
-                const popup = m.getPopup();
-                return popup && popup.isOpen();
-            });
+            const marker = markers.find(m => m.getPopup() && m.getPopup().isOpen());
             if (marker) {
                 const updatedCafe = cafes.find(c => c.id === cafeId);
                 if (updatedCafe) {
@@ -315,6 +359,7 @@
         }
 
         window.postComment = async function(cafeId) {
+            if (!currentUser) return;
             cafeId = Number(cafeId);
             const nickEl = $(`comment-nick-${cafeId}`);
             const textEl = $(`comment-text-${cafeId}`);
@@ -324,11 +369,10 @@
             if (!nickname || !text) return;
             const { error } = await supabase.from('comments').insert([{ cafe_id: cafeId, nickname, text }]);
             if (error) { console.error('Comment insert error:', error); return; }
+            nickEl.value = '';
+            textEl.value = '';
             await loadFromSupabase();
-            const marker = markers.find(m => {
-                const popup = m.getPopup();
-                return popup && popup.isOpen();
-            });
+            const marker = markers.find(m => m.getPopup() && m.getPopup().isOpen());
             if (marker) {
                 const updatedCafe = cafes.find(c => c.id === cafeId);
                 if (updatedCafe) {
@@ -349,29 +393,43 @@
             else if (cafe.parking === false) infoTags.push('<span class="popup-tag no">駐車場 なし</span>');
             const likeCount = cafe.like_count || 0;
             const commentHtml = comments.slice(0, 3).map(c => `<div class="popup-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('');
+
+            const loggedIn = !!currentUser;
+            const isOwner = currentUser && cafe.user_id === currentUser.id;
+
             return `
                 <div class="popup-inner">
                     <div class="popup-name">${escapeHtml(cafe.name)}</div>
                     <div class="popup-addr">${escapeHtml(cafe.address || '')}</div>
                     <div class="popup-comment">${escapeHtml(cafe.comment || '')}</div>
                     ${infoTags.length ? `<div class="popup-info">${infoTags.join('')}</div>` : ''}
-                    <div class="popup-like">
-                        <button class="popup-like-btn" onclick="likeCafe('${cafe.id}')">👍 いいね</button>
-                        <span class="popup-like-count">${likeCount}</span>
-                    </div>
+                    ${loggedIn ? `
+                        <div class="popup-like">
+                            <button class="popup-like-btn" onclick="likeCafe('${cafe.id}')">👍 いいね</button>
+                            <span class="popup-like-count">${likeCount}</span>
+                        </div>
+                    ` : `
+                        <div class="popup-like">
+                            <span class="popup-like-count">👍 ${likeCount}</span>
+                        </div>
+                    `}
                     <div class="popup-comments">
                         <div class="popup-comments-title">コメント (${comments.length})</div>
                         ${commentHtml || '<div class="popup-comment-item">まだコメントはありません</div>'}
-                        <div class="popup-comment-form">
-                            <input type="text" class="popup-comment-input" id="comment-nick-${cafe.id}" placeholder="名前" style="width:60px;">
-                            <input type="text" class="popup-comment-input" id="comment-text-${cafe.id}" placeholder="コメント...">
-                            <button class="popup-comment-btn" onclick="postComment('${cafe.id}')">投稿</button>
+                        ${loggedIn ? `
+                            <div class="popup-comment-form">
+                                <input type="text" class="popup-comment-input" id="comment-nick-${cafe.id}" placeholder="名前" style="width:60px;">
+                                <input type="text" class="popup-comment-input" id="comment-text-${cafe.id}" placeholder="コメント...">
+                                <button class="popup-comment-btn" onclick="postComment('${cafe.id}')">投稿</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${loggedIn ? `
+                        <div class="popup-btns" style="margin-top:8px;">
+                            <button class="popup-btn popup-btn-edit" onclick="editCafe('${cafe.id}')">編集</button>
+                            <button class="popup-btn popup-btn-del" onclick="deleteCafe('${cafe.id}')">削除</button>
                         </div>
-                    </div>
-                    <div class="popup-btns" style="margin-top:8px;">
-                        <button class="popup-btn popup-btn-edit" onclick="editCafe('${cafe.id}')">編集</button>
-                        <button class="popup-btn popup-btn-del" onclick="deleteCafe('${cafe.id}')">削除</button>
-                    </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -385,6 +443,7 @@
             L.control.zoom({ position: 'topright' }).addTo(map);
 
             map.on('click', function(e) {
+                if (!currentUser) return;
                 openRightPanel();
                 $('cafe-lat').value = e.latlng.lat.toFixed(6);
                 $('cafe-lng').value = e.latlng.lng.toFixed(6);
@@ -457,6 +516,14 @@
                 ${commentsHtml}
             `;
 
+            const detailBtns = $('detail-btns');
+            if (currentUser) {
+                detailBtns.style.display = '';
+            } else {
+                detailBtns.querySelector('#detail-edit').style.display = 'none';
+                detailBtns.querySelector('#detail-delete').style.display = 'none';
+            }
+
             $('left-title').textContent = cafe.name;
             $('view-list').classList.remove('active');
             $('view-detail').classList.add('active');
@@ -486,6 +553,7 @@
         }
 
         window.editCafe = function(id) {
+            if (!currentUser) return;
             id = Number(id);
             const cafe = cafes.find(c => c.id === id);
             if (!cafe) return;
@@ -507,6 +575,7 @@
         };
 
         window.deleteCafe = async function(id) {
+            if (!currentUser) return;
             id = Number(id);
             if (!confirm('このカフェを削除してもよろしいですか？')) return;
             map.closePopup();
@@ -538,6 +607,7 @@
         $('panel-tab').addEventListener('click', toggleLeftPanel);
 
         $('fab-add').addEventListener('click', () => {
+            if (!currentUser) return;
             map.closePopup();
             resetForm();
             openRightPanel();
@@ -551,6 +621,7 @@
 
         $('cafe-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) return;
             const editId = $('edit-id').value ? Number($('edit-id').value) : null;
             const name = $('cafe-name').value.trim();
             const address = $('cafe-address').value.trim();
@@ -571,13 +642,42 @@
                 const { error } = await supabase.from('cafes').update({ name, address, lat, lng, comment, hours, wifi, power, parking }).eq('id', editId);
                 if (error) { console.error('Update error:', error); }
             } else {
-                const { error } = await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking }]);
+                const { error } = await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking, user_id: currentUser.id }]);
                 if (error) { console.error('Insert error:', error); }
             }
             await loadFromSupabase();
             hideLoading();
             closeRightPanel();
         });
+
+        $('btn-signup').addEventListener('click', async () => {
+            const email = $('auth-email').value.trim();
+            const password = $('auth-password').value;
+            if (!email || !password) return alert('メールアドレスとパスワードを入力してください');
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) { alert('登録エラー: ' + error.message); return; }
+            alert('登録完了！確認メールが届く場合がありますが、メール確認がOFFの場合はそのままログインできます。');
+        });
+
+        $('btn-login').addEventListener('click', async () => {
+            const email = $('auth-email').value.trim();
+            const password = $('auth-password').value;
+            if (!email || !password) return alert('メールアドレスとパスワードを入力してください');
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) { alert('ログインエラー: ' + error.message); return; }
+        });
+
+        $('btn-logout').addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            updateAuthUI(session?.user || null);
+            loadFromSupabase();
+        });
+
+        const { data: { session } } = await supabase.auth.getSession();
+        updateAuthUI(session?.user || null);
 
         initMap();
         loadFromSupabase();
