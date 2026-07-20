@@ -341,7 +341,7 @@
         window.showTab=function(tab){currentTab=tab;$('tab-list').classList.toggle('active',tab==='list');$('tab-feed').classList.toggle('active',tab==='feed');if(tab==='list')renderList();else renderFeed();switchView(tab)};
         window.openThread=openThread;
 
-        window.jumpToCafe=function(id){const c=cafes.find(x=>x.id===id);if(!c)return;map.setView([c.lat,c.map?.lng||c.lng],16);markers.forEach(m=>{m.closePopup()});const idx=cafes.findIndex(x=>x.id===id);if(markers[idx])markers[idx].openPopup()};
+        window.jumpToCafe=function(id){const c=cafes.find(x=>x.id===id);if(!c)return;map.setView([c.lat,c.lng],16);markers.forEach(m=>{m.closePopup()});const idx=cafes.findIndex(x=>x.id===id);if(markers[idx])markers[idx].openPopup()};
 
         window.likeCafe=async function(id){
             if(!currentUser)return;
