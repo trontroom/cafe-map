@@ -8,198 +8,155 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; overflow: hidden; }
-
-        /* ===================== */
-        /* Login Screen          */
-        /* ===================== */
-        .login-screen { position: fixed; inset: 0; z-index: 9999; background: #F9FAFB; display: flex; align-items: center; justify-content: center; transition: opacity 0.4s, visibility 0.4s; }
-        .login-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-        .login-card { width: 100%; max-width: 400px; padding: 48px 40px; background: #fff; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.08); text-align: center; }
-        .login-logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-        .login-title { font-size: 1.5rem; font-weight: 700; color: #1D2939; margin-bottom: 4px; }
-        .login-subtitle { font-size: 0.85rem; color: #98A2B3; margin-bottom: 32px; }
-        .login-field { margin-bottom: 14px; text-align: left; }
-        .login-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-        .login-field input { width: 100%; padding: 12px 14px; border: 1.5px solid #D0D5DD; border-radius: 12px; font-size: 0.9rem; font-family: inherit; color: #1D2939; background: #F9FAFB; transition: border-color 0.2s, background 0.2s; }
-        .login-field input:focus { outline: none; border-color: #0A7AC2; background: #fff; box-shadow: 0 0 0 3px rgba(10,122,194,0.12); }
-        .login-field input::placeholder { color: #98A2B3; }
-        .login-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; font-size: 0.95rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; margin-top: 6px; }
-        .login-btn-primary { background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; box-shadow: 0 4px 16px rgba(10,122,194,0.3); }
-        .login-btn-primary:hover { box-shadow: 0 6px 24px rgba(10,122,194,0.4); transform: translateY(-1px); }
-        .login-btn-primary:active { transform: translateY(0); }
-        .login-btn-secondary { background: #1D2939; color: #fff; box-shadow: 0 4px 16px rgba(29,41,57,0.3); margin-top: 10px; }
-        .login-btn-secondary:hover { background: #344054; transform: translateY(-1px); }
-        .login-btn-secondary:active { transform: translateY(0); }
-        .login-msg { font-size: 0.8rem; margin-top: 10px; min-height: 20px; }
-        .login-msg.error { color: #D92D20; }
-        .login-msg.success { color: #065F46; background: #D1FAE5; padding: 8px 12px; border-radius: 8px; }
-        .login-link { font-size: 0.82rem; color: #667085; margin-top: 20px; }
-        .login-link span { color: #0A7AC2; font-weight: 600; cursor: pointer; text-decoration: underline; }
-        .login-link span:hover { color: #0596D5; }
-        .login-card.hidden { display: none; }
-
-        /* ===================== */
-        /* Map App               */
-        /* ===================== */
-        .app-screen { display: none; }
-        .app-screen.active { display: block; }
-
-        #header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); z-index: 1002; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 12px rgba(10,122,194,0.3); }
-        #header h1 { font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
-
-        /* --- User Avatar --- */
-        .user-avatar { position: relative; }
-        .avatar-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.2); color: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; text-transform: uppercase; }
-        .avatar-btn:hover { background: rgba(255,255,255,0.35); border-color: #fff; }
-        .avatar-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 220px; background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); padding: 16px; display: none; z-index: 1003; }
-        .avatar-dropdown.open { display: block; }
-        .avatar-dropdown-label { font-size: 0.7rem; font-weight: 600; color: #98A2B3; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
-        .avatar-dropdown-email { font-size: 0.85rem; font-weight: 600; color: #1D2939; margin-bottom: 14px; word-break: break-all; }
-        .avatar-dropdown-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
-        .avatar-dropdown-logout { background: #FEE4E2; color: #D92D20; }
-        .avatar-dropdown-logout:hover { background: #FECDCA; }
-
-        #map { position: fixed; top: 52px; left: 0; width: 100%; height: calc(100% - 52px); z-index: 1; }
-
-        /* --- Loading --- */
-        .loading-overlay { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 1003; display: flex; align-items: center; justify-content: center; }
-        .loading-spinner { width: 40px; height: 40px; border: 4px solid #E4E7EC; border-top-color: #0A7AC2; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- FAB --- */
-        .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 16px; border: none; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; cursor: pointer; z-index: 1000; box-shadow: 0 4px 20px rgba(10,122,194,0.4); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
-        .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(10,122,194,0.5); }
-        .fab:active { transform: scale(0.95); }
-
-        /* --- Panel Base --- */
-        .panel { position: fixed; top: 12px; bottom: 12px; background: #fff; border-radius: 16px; z-index: 1001; box-shadow: 0 8px 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; }
-        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #E4E7EC; flex-shrink: 0; }
-        .panel-header h2 { font-size: 1rem; font-weight: 700; color: #1D2939; }
-        .panel-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: #F2F4F7; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 16px; transition: background 0.15s; flex-shrink: 0; }
-        .panel-close:hover { background: #E4E7EC; }
-        .panel-body { padding: 12px 16px 16px; overflow-y: auto; flex: 1; border-radius: 0 0 16px 16px; }
-
-        /* --- Left Panel (List) --- */
-        .panel-left { left: 12px; top: 64px; bottom: 12px; width: 340px; transform: translateX(-120%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
-        .panel-left.open { transform: translateX(0); }
-
-        /* --- Panel Toggle --- */
-        .panel-toggle { position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 18px; height: 48px; background: #fff; border: none; border-radius: 0 8px 8px 0; box-shadow: 4px 0 12px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 11px; transition: all 0.2s; z-index: 10; }
-        .panel-toggle:hover { background: #F0F7FF; color: #0A7AC2; }
-
-        /* --- Collapsed Tab --- */
-        .panel-tab { position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: 28px; height: 64px; background: #fff; border: none; border-radius: 0 10px 10px 0; box-shadow: 4px 0 16px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #0A7AC2; font-size: 16px; font-weight: 700; z-index: 1001; transition: all 0.2s; opacity: 0; pointer-events: none; }
-        .panel-tab.visible { opacity: 1; pointer-events: auto; }
-        .panel-tab:hover { width: 32px; background: #F0F7FF; }
-
-        /* --- Right Panel (Form) --- */
-        .panel-right { right: 24px; left: auto; top: 64px; bottom: 92px; width: 380px; max-width: calc(100vw - 24px); transform: scale(0); transform-origin: bottom right; opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease; }
-        .panel-right.open { transform: scale(1); opacity: 1; pointer-events: auto; }
-
-        /* --- Cafe List --- */
-        .cafe-card { padding: 12px 14px; border: 1.5px solid #E4E7EC; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; background: #fff; }
-        .cafe-card:hover { border-color: #0A7AC2; background: #F0F7FF; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(10,122,194,0.12); }
-        .cafe-card-name { font-size: 0.9rem; font-weight: 600; color: #1D2939; margin-bottom: 3px; }
-        .cafe-card-addr { font-size: 0.78rem; color: #667085; }
-        .cafe-card-comment { font-size: 0.78rem; color: #0A7AC2; margin-top: 3px; }
-        .cafe-card-meta { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
-        .cafe-card-tag { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: #F0F7FF; color: #0A7AC2; }
-
-        /* --- Detail --- */
-        .detail-name { font-size: 1.1rem; font-weight: 700; color: #1D2939; margin-bottom: 4px; }
-        .detail-addr { font-size: 0.82rem; color: #667085; margin-bottom: 10px; }
-        .detail-comment { font-size: 0.85rem; color: #344054; padding: 10px 12px; background: #F0F7FF; border-radius: 10px; border-left: 3px solid #0A7AC2; margin-bottom: 12px; line-height: 1.5; }
-        .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-        .detail-tag { font-size: 0.78rem; padding: 4px 10px; border-radius: 8px; background: #F0F7FF; color: #0A7AC2; font-weight: 500; }
-        .detail-tag.yes { background: #D1FAE5; color: #065F46; }
-        .detail-tag.no { background: #FEE2E2; color: #991B1B; }
-        .detail-like { font-size: 0.85rem; color: #667085; margin-bottom: 12px; }
-        .detail-comments { border-top: 1px solid #E4E7EC; padding-top: 10px; margin-top: 10px; }
-        .detail-comments-title { font-size: 0.8rem; font-weight: 600; color: #667085; margin-bottom: 6px; }
-        .detail-comment-item { font-size: 0.8rem; color: #344054; padding: 4px 0; border-bottom: 1px solid #F2F4F7; }
-        .detail-comment-item strong { color: #0A7AC2; }
-
-        /* --- Form --- */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 0.72rem; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
-        .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid #D0D5DD; border-radius: 10px; font-size: 0.85rem; font-family: inherit; color: #1D2939; background: #F9FAFB; transition: border-color 0.2s, background 0.2s; }
-        .form-input:focus { outline: none; border-color: #0A7AC2; background: #fff; box-shadow: 0 0 0 3px rgba(10,122,194,0.12); }
-        .form-input::placeholder { color: #98A2B3; }
-        .form-row { display: flex; gap: 8px; }
-        .form-row .form-group { flex: 1; }
-        .form-hint { font-size: 0.75rem; color: #98A2B3; margin-top: 4px; padding: 8px 10px; background: #F9FAFB; border-radius: 8px; border-left: 3px solid #D0D5DD; }
-
-        /* --- Buttons --- */
-        .btn-group { display: flex; gap: 8px; margin-top: 16px; }
-        .btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; box-shadow: 0 2px 8px rgba(10,122,194,0.3); }
-        .btn-primary:hover { box-shadow: 0 4px 16px rgba(10,122,194,0.4); transform: translateY(-1px); }
-        .btn-secondary { background: #F2F4F7; color: #667085; }
-        .btn-secondary:hover { background: #E4E7EC; }
-        .btn-danger { background: #FEE4E2; color: #D92D20; }
-        .btn-danger:hover { background: #FECDCA; }
-
-        /* --- Leaflet Popup --- */
-        .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; padding: 0 !important; }
-        .leaflet-popup-content { margin: 0 !important; min-width: 200px; }
-        .leaflet-popup-tip { box-shadow: none !important; }
-        .leaflet-popup-close-button { font-size: 20px !important; color: #98A2B3 !important; top: 10px !important; right: 10px !important; }
-        .popup-inner { padding: 16px; }
-        .popup-name { font-size: 1rem; font-weight: 700; color: #1D2939; margin-bottom: 6px; }
-        .popup-addr { font-size: 0.8rem; color: #667085; margin-bottom: 4px; }
-        .popup-comment { font-size: 0.85rem; color: #344054; margin-bottom: 10px; }
-        .popup-info { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-        .popup-tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; background: #F0F7FF; color: #0A7AC2; font-weight: 500; }
-        .popup-tag.yes { background: #D1FAE5; color: #065F46; }
-        .popup-tag.no { background: #FEE2E2; color: #991B1B; }
-        .popup-like { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-        .popup-like-btn { padding: 4px 12px; border-radius: 8px; border: 1.5px solid #E4E7EC; background: #fff; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
-        .popup-like-btn:hover { border-color: #0A7AC2; background: #F0F7FF; }
-        .popup-like-count { font-size: 0.85rem; color: #667085; font-weight: 600; }
-        .popup-comments { border-top: 1px solid #E4E7EC; padding-top: 8px; margin-top: 8px; }
-        .popup-comments-title { font-size: 0.75rem; font-weight: 600; color: #667085; margin-bottom: 6px; }
-        .popup-comment-item { font-size: 0.78rem; color: #344054; padding: 4px 0; border-bottom: 1px solid #F2F4F7; }
-        .popup-comment-item strong { color: #0A7AC2; }
-        .popup-comment-form { display: flex; gap: 4px; margin-top: 6px; }
-        .popup-comment-input { flex: 1; padding: 5px 8px; border: 1px solid #D0D5DD; border-radius: 6px; font-size: 0.75rem; font-family: inherit; }
-        .popup-comment-input:focus { outline: none; border-color: #0A7AC2; }
-        .popup-comment-btn { padding: 5px 10px; border: none; border-radius: 6px; background: #0A7AC2; color: #fff; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
-        .popup-btns { display: flex; gap: 8px; }
-        .popup-btn { padding: 6px 14px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .popup-btn-edit { background: #E0F2FE; color: #0A7AC2; }
-        .popup-btn-edit:hover { background: #BAE6FD; }
-        .popup-btn-del { background: #FEE4E2; color: #D92D20; }
-        .popup-btn-del:hover { background: #FECDCA; }
-
-        .leaflet-control-attribution { font-size: 10px !important; }
-        .view { display: none; }
-        .view.active { display: block; }
-
-        @media (max-width: 768px) {
-            .panel-left, .panel-right { width: calc(100vw - 24px); }
-            .panel-right { right: 12px; }
-            .fab { bottom: 16px; right: 16px; }
-            .login-card { margin: 16px; padding: 36px 28px; }
-        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;overflow:hidden}
+        .login-screen{position:fixed;inset:0;z-index:9999;background:#F9FAFB;display:flex;align-items:center;justify-content:center;transition:opacity .4s,visibility .4s}
+        .login-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+        .login-card{width:100%;max-width:400px;padding:48px 40px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.08);text-align:center}
+        .login-card.hidden{display:none}
+        .login-logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+        .login-title{font-size:1.5rem;font-weight:700;color:#1D2939;margin-bottom:4px}
+        .login-field{margin-bottom:14px;text-align:left}
+        .login-field label{display:block;font-size:.75rem;font-weight:600;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+        .login-field input{width:100%;padding:12px 14px;border:1.5px solid #D0D5DD;border-radius:12px;font-size:.9rem;font-family:inherit;color:#1D2939;background:#F9FAFB;transition:border-color .2s,background .2s}
+        .login-field input:focus{outline:none;border-color:#0A7AC2;background:#fff;box-shadow:0 0 0 3px rgba(10,122,194,.12)}
+        .login-field input::placeholder{color:#98A2B3}
+        .login-btn{width:100%;padding:13px;border-radius:12px;border:none;font-size:.95rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:6px}
+        .login-btn-primary{background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;box-shadow:0 4px 16px rgba(10,122,194,.3)}
+        .login-btn-primary:hover{box-shadow:0 6px 24px rgba(10,122,194,.4);transform:translateY(-1px)}
+        .login-msg{font-size:.8rem;margin-top:10px;min-height:20px}
+        .login-msg.error{color:#D92D20}
+        .login-msg.success{color:#065F46;background:#D1FAE5;padding:8px 12px;border-radius:8px}
+        .login-link{font-size:.82rem;color:#667085;margin-top:20px}
+        .login-link span{color:#0A7AC2;font-weight:600;cursor:pointer;text-decoration:underline}
+        .app-screen{display:none}.app-screen.active{display:block}
+        #header{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#0A7AC2,#0596D5);z-index:1002;display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:0 2px 12px rgba(10,122,194,.3)}
+        #header h1{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:.02em}
+        .user-avatar{position:relative}
+        .avatar-btn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.2);color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;text-transform:uppercase}
+        .avatar-btn:hover{background:rgba(255,255,255,.35);border-color:#fff}
+        .avatar-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.16);padding:16px;display:none;z-index:1003}
+        .avatar-dropdown.open{display:block}
+        .avatar-dropdown-label{font-size:.7rem;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+        .avatar-dropdown-email{font-size:.85rem;font-weight:600;color:#1D2939;margin-bottom:14px;word-break:break-all}
+        .avatar-dropdown-btn{width:100%;padding:10px;border-radius:10px;border:none;font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+        .avatar-dropdown-logout{background:#FEE4E2;color:#D92D20}.avatar-dropdown-logout:hover{background:#FECDCA}
+        #map{position:fixed;top:52px;left:0;width:100%;height:calc(100% - 52px);z-index:1}
+        .loading-overlay{position:fixed;top:52px;left:0;right:0;bottom:0;background:rgba(255,255,255,.8);z-index:1003;display:flex;align-items:center;justify-content:center}
+        .loading-spinner{width:40px;height:40px;border:4px solid #E4E7EC;border-top-color:#0A7AC2;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:16px;border:none;background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;font-size:28px;cursor:pointer;z-index:1000;box-shadow:0 4px 20px rgba(10,122,194,.4);transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center}
+        .fab:hover{transform:scale(1.08)}.fab:active{transform:scale(.95)}
+        .panel{position:fixed;top:12px;bottom:12px;background:#fff;border-radius:16px;z-index:1001;box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column}
+        .panel-left{left:12px;top:64px;bottom:12px;width:380px;transform:translateX(-120%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
+        .panel-left.open{transform:translateX(0)}
+        .panel-toggle{position:absolute;top:50%;right:-18px;transform:translateY(-50%);width:18px;height:48px;background:#fff;border:none;border-radius:0 8px 8px 0;box-shadow:4px 0 12px rgba(0,0,0,.12);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#667085;font-size:11px;transition:all .2s;z-index:10}
+        .panel-toggle:hover{background:#F0F7FF;color:#0A7AC2}
+        .panel-tab{position:fixed;top:50%;left:0;transform:translateY(-50%);width:28px;height:64px;background:#fff;border:none;border-radius:0 10px 10px 0;box-shadow:4px 0 16px rgba(0,0,0,.12);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0A7AC2;font-size:16px;font-weight:700;z-index:1001;transition:all .2s;opacity:0;pointer-events:none}
+        .panel-tab.visible{opacity:1;pointer-events:auto}.panel-tab:hover{width:32px;background:#F0F7FF}
+        .panel-header{padding:12px 16px 0;flex-shrink:0}
+        .panel-body{padding:8px 12px 12px;overflow-y:auto;flex:1}
+        .tab-bar{display:flex;padding:0 16px;border-bottom:1.5px solid #E4E7EC;flex-shrink:0}
+        .tab-btn{flex:1;padding:10px 0;border:none;background:none;font-size:.82rem;font-weight:600;font-family:inherit;color:#98A2B3;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;margin-bottom:-1.5px}
+        .tab-btn.active{color:#0A7AC2;border-bottom-color:#0A7AC2}
+        .cafe-card{padding:12px 14px;border:1.5px solid #E4E7EC;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;background:#fff}
+        .cafe-card:hover{border-color:#0A7AC2;background:#F0F7FF;transform:translateY(-1px);box-shadow:0 2px 8px rgba(10,122,194,.12)}
+        .cafe-card-name{font-size:.9rem;font-weight:600;color:#1D2939;margin-bottom:3px}
+        .cafe-card-addr{font-size:.78rem;color:#667085}
+        .cafe-card-meta{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+        .cafe-card-tag{font-size:.68rem;padding:2px 6px;border-radius:4px;background:#F0F7FF;color:#0A7AC2}
+        .feed-card{padding:14px;border:1.5px solid #E4E7EC;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;background:#fff}
+        .feed-card:hover{border-color:#0A7AC2;background:#F8FBFF;box-shadow:0 2px 8px rgba(10,122,194,.1)}
+        .feed-card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+        .feed-card-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+        .feed-card-title{font-size:.88rem;font-weight:700;color:#1D2939}
+        .feed-card-latest{font-size:.75rem;color:#667085;margin-top:4px;line-height:1.4}
+        .feed-card-latest strong{color:#0A7AC2;font-weight:600}
+        .feed-card-footer{display:flex;gap:14px;margin-top:10px;padding-top:8px;border-top:1px solid #F2F4F7}
+        .feed-card-stat{font-size:.75rem;color:#667085;display:flex;align-items:center;gap:4px}
+        .feed-sort{display:flex;gap:8px;margin-bottom:10px}
+        .feed-sort-btn{padding:5px 12px;border-radius:8px;border:1.5px solid #E4E7EC;background:#fff;font-size:.75rem;font-weight:600;font-family:inherit;color:#667085;cursor:pointer;transition:all .15s}
+        .feed-sort-btn.active{border-color:#0A7AC2;color:#0A7AC2;background:#F0F7FF}
+        .thread-back{display:flex;align-items:center;gap:6px;padding:8px 12px;margin:0 -12px 8px;cursor:pointer;color:#0A7AC2;font-size:.82rem;font-weight:600;border:none;background:none;font-family:inherit}
+        .thread-back:hover{background:#F0F7FF;border-radius:8px}
+        .thread-cafe-info{padding:12px;background:#F9FAFB;border-radius:12px;margin-bottom:12px}
+        .thread-cafe-name{font-size:1rem;font-weight:700;color:#1D2939;margin-bottom:4px}
+        .thread-cafe-addr{font-size:.78rem;color:#667085;margin-bottom:6px}
+        .thread-cafe-tags{display:flex;gap:4px;flex-wrap:wrap}
+        .thread-cafe-tag{font-size:.7rem;padding:3px 8px;border-radius:6px;background:#F0F7FF;color:#0A7AC2}
+        .thread-cafe-tag.yes{background:#D1FAE5;color:#065F46}
+        .thread-cafe-tag.no{background:#FEE2E2;color:#991B1B}
+        .thread-cafe-actions{display:flex;gap:8px;margin-top:10px}
+        .thread-cafe-action{padding:6px 12px;border-radius:8px;border:1px solid #E4E7EC;background:#fff;font-size:.75rem;font-weight:600;font-family:inherit;cursor:pointer;color:#0A7AC2;transition:all .15s}
+        .thread-cafe-action:hover{background:#F0F7FF}
+        .thread-comment{padding:12px;border-bottom:1px solid #F2F4F7}
+        .thread-comment:last-child{border-bottom:none}
+        .thread-comment-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+        .thread-comment-user{font-size:.82rem;font-weight:600;color:#0A7AC2}
+        .thread-comment-time{font-size:.7rem;color:#98A2B3}
+        .thread-comment-text{font-size:.82rem;color:#344054;line-height:1.5}
+        .thread-comment-actions{display:flex;gap:10px;margin-top:6px}
+        .thread-comment-action{font-size:.72rem;color:#667085;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600;padding:2px 0}
+        .thread-comment-action:hover{color:#0A7AC2}
+        .thread-comment-reply{margin-left:20px;border-left:2px solid #E4E7EC;padding-left:10px}
+        .thread-reply-form{display:flex;gap:6px;margin-top:10px}
+        .thread-reply-input{flex:1;padding:8px 12px;border:1.5px solid #D0D5DD;border-radius:10px;font-size:.82rem;font-family:inherit;background:#F9FAFB}
+        .thread-reply-input:focus{outline:none;border-color:#0A7AC2;background:#fff}
+        .thread-reply-btn{padding:8px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer}
+        .thread-reply-btn:hover{box-shadow:0 2px 8px rgba(10,122,194,.3)}
+        .panel-right{right:24px;left:auto;top:64px;bottom:92px;width:380px;max-width:calc(100vw - 24px);transform:scale(0);transform-origin:bottom right;opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s ease}
+        .panel-right.open{transform:scale(1);opacity:1;pointer-events:auto}
+        .panel-close{width:32px;height:32px;border-radius:8px;border:none;background:#F2F4F7;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#667085;font-size:16px;transition:background .15s;flex-shrink:0}
+        .panel-close:hover{background:#E4E7EC}
+        .form-group{margin-bottom:12px}
+        .form-group label{display:block;font-size:.72rem;font-weight:600;color:#667085;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+        .form-input{width:100%;padding:9px 12px;border:1.5px solid #D0D5DD;border-radius:10px;font-size:.85rem;font-family:inherit;color:#1D2939;background:#F9FAFB;transition:border-color .2s,background .2s}
+        .form-input:focus{outline:none;border-color:#0A7AC2;background:#fff;box-shadow:0 0 0 3px rgba(10,122,194,.12)}
+        .form-input::placeholder{color:#98A2B3}
+        .form-row{display:flex;gap:8px}.form-row .form-group{flex:1}
+        .form-hint{font-size:.75rem;color:#98A2B3;margin-top:4px;padding:8px 10px;background:#F9FAFB;border-radius:8px;border-left:3px solid #D0D5DD}
+        .btn-group{display:flex;gap:8px;margin-top:16px}
+        .btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
+        .btn-primary{background:linear-gradient(135deg,#0A7AC2,#0596D5);color:#fff;box-shadow:0 2px 8px rgba(10,122,194,.3)}
+        .btn-primary:hover{box-shadow:0 4px 16px rgba(10,122,194,.4);transform:translateY(-1px)}
+        .btn-secondary{background:#F2F4F7;color:#667085}.btn-secondary:hover{background:#E4E7EC}
+        .btn-danger{background:#FEE4E2;color:#D92D20}.btn-danger:hover{background:#FECDCA}
+        .empty-msg{color:#98A2B3;font-size:.85rem;text-align:center;padding:24px 0}
+        .panel-right-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid #E4E7EC;flex-shrink:0}
+        .panel-right-header h2{font-size:1rem;font-weight:700;color:#1D2939}
+        .leaflet-popup-content-wrapper{border-radius:14px!important;box-shadow:0 8px 30px rgba(0,0,0,.15)!important;padding:0!important}
+        .leaflet-popup-content{margin:0!important;min-width:200px}
+        .leaflet-popup-tip{box-shadow:none!important}
+        .popup-inner{padding:16px}
+        .popup-name{font-size:1rem;font-weight:700;color:#1D2939;margin-bottom:6px}
+        .popup-addr{font-size:.8rem;color:#667085;margin-bottom:4px}
+        .popup-comment{font-size:.85rem;color:#344054;margin-bottom:10px}
+        .popup-info{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+        .popup-tag{font-size:.72rem;padding:3px 8px;border-radius:6px;background:#F0F7FF;color:#0A7AC2;font-weight:500}
+        .popup-tag.yes{background:#D1FAE5;color:#065F46}
+        .popup-tag.no{background:#FEE2E2;color:#991B1B}
+        .popup-like{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+        .popup-like-btn{padding:4px 12px;border-radius:8px;border:1.5px solid #E4E7EC;background:#fff;cursor:pointer;font-size:.85rem;transition:all .15s}
+        .popup-like-btn:hover{border-color:#0A7AC2;background:#F0F7FF}
+        .popup-like-count{font-size:.85rem;color:#667085;font-weight:600}
+        .popup-thread-link{display:block;padding:8px 12px;border-radius:8px;background:#F0F7FF;color:#0A7AC2;font-size:.82rem;font-weight:600;text-align:center;cursor:pointer;border:none;width:100%;font-family:inherit;margin-bottom:8px;transition:all .15s}
+        .popup-thread-link:hover{background:#DBEAFE}
+        .popup-btns{display:flex;gap:8px;margin-top:8px}
+        .popup-btn{padding:6px 14px;border-radius:8px;border:none;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
+        .popup-btn-edit{background:#E0F2FE;color:#0A7AC2}.popup-btn-edit:hover{background:#BAE6FD}
+        .popup-btn-del{background:#FEE4E2;color:#D92D20}.popup-btn-del:hover{background:#FECDCA}
+        .leaflet-control-attribution{font-size:10px!important}
+        .view{display:none}.view.active{display:block}
+        @media(max-width:768px){.panel-left,.panel-right{width:calc(100vw - 24px)}.panel-right{right:12px}.fab{bottom:16px;right:16px}}
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
         <div class="login-card" id="login-card">
             <div class="login-logo">C</div>
             <div class="login-title">ログイン</div>
-            <div class="login-field" style="margin-top:24px;">
-                <label>メールアドレス</label>
-                <input type="email" id="login-email" placeholder="example@email.com">
-            </div>
-            <div class="login-field">
-                <label>パスワード</label>
-                <input type="password" id="login-password" placeholder="パスワードを入力">
-            </div>
+            <div class="login-field" style="margin-top:24px"><label>メールアドレス</label><input type="email" id="login-email" placeholder="example@email.com"></div>
+            <div class="login-field"><label>パスワード</label><input type="password" id="login-password" placeholder="パスワードを入力"></div>
             <div class="login-msg" id="login-msg"></div>
             <button class="login-btn login-btn-primary" id="btn-login">ログイン</button>
             <div class="login-link">アカウントをお持ちでない方は <span id="goto-signup">新規登録</span></div>
@@ -207,30 +164,19 @@
         <div class="login-card hidden" id="signup-card">
             <div class="login-logo">C</div>
             <div class="login-title">新規アカウント作成</div>
-            <div class="login-field" style="margin-top:24px;">
-                <label>メールアドレス</label>
-                <input type="email" id="signup-email" placeholder="example@email.com">
-            </div>
-            <div class="login-field">
-                <label>パスワード</label>
-                <input type="password" id="signup-password" placeholder="6文字以上のパスワード">
-            </div>
-            <div class="login-field">
-                <label>パスワード（確認）</label>
-                <input type="password" id="signup-password-confirm" placeholder="もう一度パスワードを入力">
-            </div>
+            <div class="login-field" style="margin-top:24px"><label>メールアドレス</label><input type="email" id="signup-email" placeholder="example@email.com"></div>
+            <div class="login-field"><label>パスワード</label><input type="password" id="signup-password" placeholder="6文字以上のパスワード"></div>
+            <div class="login-field"><label>パスワード（確認）</label><input type="password" id="signup-password-confirm" placeholder="もう一度パスワードを入力"></div>
             <div class="login-msg" id="signup-msg"></div>
             <button class="login-btn login-btn-primary" id="btn-signup">アカウントを作成</button>
             <div class="login-link">すでにアカウントをお持ちの方は <span id="goto-login">ログイン</span></div>
         </div>
     </div>
 
-    <!-- Map App -->
     <div class="app-screen" id="app-screen">
         <div id="header">
             <h1>Cafe Map</h1>
-            <div class="user-avatar" id="user-avatar">
-                <button class="avatar-btn" id="avatar-btn"></button>
+            <div class="user-avatar"><button class="avatar-btn" id="avatar-btn"></button>
                 <div class="avatar-dropdown" id="avatar-dropdown">
                     <div class="avatar-dropdown-label">ログイン中</div>
                     <div class="avatar-dropdown-email" id="dropdown-email"></div>
@@ -239,100 +185,45 @@
             </div>
         </div>
         <div id="map"></div>
-
         <button class="panel-tab" id="panel-tab" title="一覧を展開">&#9654;</button>
         <button class="fab" id="fab-add" title="カフェを追加">+</button>
 
-        <!-- Left Panel -->
         <div class="panel panel-left open" id="panel-left">
             <button class="panel-toggle" id="panel-toggle" title="一覧を格納">&#9664;</button>
-            <div class="panel-header">
-                <h2 id="left-title">カフェ一覧</h2>
+            <div class="tab-bar">
+                <button class="tab-btn active" id="tab-list">🗺️ リスト</button>
+                <button class="tab-btn" id="tab-feed">💬 フィード</button>
             </div>
             <div class="panel-body">
                 <div class="view active" id="view-list"></div>
-                <div class="view" id="view-detail">
-                    <div class="detail-name" id="detail-name"></div>
-                    <div class="detail-addr" id="detail-addr"></div>
-                    <div class="detail-comment" id="detail-comment"></div>
-                    <div class="detail-tags" id="detail-tags"></div>
-                    <div class="detail-like" id="detail-like"></div>
-                    <div class="detail-comments" id="detail-comments"></div>
-                    <div class="btn-group" id="detail-btns">
-                        <button class="btn btn-secondary" id="detail-back">← 一覧</button>
-                        <button class="btn btn-primary" id="detail-edit">編集</button>
-                        <button class="btn btn-danger" id="detail-delete">削除</button>
-                    </div>
-                </div>
+                <div class="view" id="view-feed"></div>
+                <div class="view" id="view-thread"></div>
             </div>
         </div>
 
-        <!-- Right Panel -->
         <div class="panel panel-right" id="panel-right">
-            <div class="panel-header">
+            <div class="panel-right-header">
                 <h2 id="right-title">カフェを追加</h2>
                 <button class="panel-close" id="right-close">&times;</button>
             </div>
             <div class="panel-body">
                 <form id="cafe-form">
-                    <div class="form-group">
-                        <label>カフェ名</label>
-                        <input type="text" class="form-input" id="cafe-name" placeholder="例: スターバックス" required>
-                    </div>
-                    <div class="form-group">
-                        <label>住所</label>
-                        <input type="text" class="form-input" id="cafe-address" placeholder="例: 渋谷区道玄坂1-1-1">
-                    </div>
+                    <div class="form-group"><label>カフェ名</label><input type="text" class="form-input" id="cafe-name" placeholder="例: スターバックス" required></div>
+                    <div class="form-group"><label>住所</label><input type="text" class="form-input" id="cafe-address" placeholder="例: 渋谷区道玄坂1-1-1"></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>緯度</label>
-                            <input type="number" class="form-input" id="cafe-lat" placeholder="35.6595" step="any" required>
-                        </div>
-                        <div class="form-group">
-                            <label>経度</label>
-                            <input type="number" class="form-input" id="cafe-lng" placeholder="139.6990" step="any" required>
-                        </div>
+                        <div class="form-group"><label>緯度</label><input type="number" class="form-input" id="cafe-lat" placeholder="35.6595" step="any" required></div>
+                        <div class="form-group"><label>経度</label><input type="number" class="form-input" id="cafe-lng" placeholder="139.6990" step="any" required></div>
                     </div>
-                    <div class="form-group">
-                        <label>コメント</label>
-                        <input type="text" class="form-input" id="cafe-comment" placeholder="一言コメント">
-                    </div>
-                    <div class="form-group">
-                        <label>営業時間</label>
-                        <input type="text" class="form-input" id="cafe-hours" placeholder="例: 9:00〜18:00">
-                    </div>
+                    <div class="form-group"><label>コメント</label><input type="text" class="form-input" id="cafe-comment" placeholder="一言コメント"></div>
+                    <div class="form-group"><label>営業時間</label><input type="text" class="form-input" id="cafe-hours" placeholder="例: 9:00〜18:00"></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Wifi</label>
-                            <select class="form-input" id="cafe-wifi">
-                                <option value="">不明</option>
-                                <option value="true">あり</option>
-                                <option value="false">なし</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>電源</label>
-                            <select class="form-input" id="cafe-power">
-                                <option value="">不明</option>
-                                <option value="true">あり</option>
-                                <option value="false">なし</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>駐車場</label>
-                            <select class="form-input" id="cafe-parking">
-                                <option value="">不明</option>
-                                <option value="true">あり</option>
-                                <option value="false">なし</option>
-                            </select>
-                        </div>
+                        <div class="form-group"><label>Wifi</label><select class="form-input" id="cafe-wifi"><option value="">不明</option><option value="true">あり</option><option value="false">なし</option></select></div>
+                        <div class="form-group"><label>電源</label><select class="form-input" id="cafe-power"><option value="">不明</option><option value="true">あり</option><option value="false">なし</option></select></div>
+                        <div class="form-group"><label>駐車場</label><select class="form-input" id="cafe-parking"><option value="">不明</option><option value="true">あり</option><option value="false">なし</option></select></div>
                     </div>
                     <p class="form-hint">地図をクリックすると緯度・経度が自動入力されます</p>
                     <input type="hidden" id="edit-id" value="">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-secondary" id="form-cancel">キャンセル</button>
-                        <button type="submit" class="btn btn-primary" id="form-save">登録</button>
-                    </div>
+                    <div class="btn-group"><button type="button" class="btn btn-secondary" id="form-cancel">キャンセル</button><button type="submit" class="btn btn-primary" id="form-save">登録</button></div>
                 </form>
             </div>
         </div>
@@ -340,421 +231,220 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+        const SUPABASE_URL='https://gyeogrnfnmjrhzqikjvq.supabase.co';
+        const SUPABASE_KEY='sb_publishable_1hTi4qYLdb2CC4fqOyCiiw_VJNO5n6j';
+        const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-        const SUPABASE_URL = 'https://gyeogrnfnmjrhzqikjvq.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_1hTi4qYLdb2CC4fqOyCiiw_VJNO5n6j';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        let cafes=[],markers=[],map,currentCafeId=null,currentUser=null,mapInitialized=false,currentTab='list',feedSort='newest';
+        const $=id=>document.getElementById(id);
 
-        let cafes = [];
-        let markers = [];
-        let map;
-        let currentCafeId = null;
-        let currentUser = null;
-        let mapInitialized = false;
+        function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+        function showLoading(){let el=document.getElementById('loading-overlay');if(!el){el=document.createElement('div');el.id='loading-overlay';el.className='loading-overlay';el.innerHTML='<div class="loading-spinner"></div>';document.body.appendChild(el)}}
+        function hideLoading(){const el=document.getElementById('loading-overlay');if(el)el.remove()}
+        function timeAgo(date){const s=Math.floor((Date.now()-new Date(date))/1000);if(s<60)return'たった今';if(s<3600)return Math.floor(s/60)+'分前';if(s<86400)return Math.floor(s/3600)+'時間前';return Math.floor(s/86400)+'日前'}
 
-        const $ = id => document.getElementById(id);
+        function switchToApp(user){currentUser=user;$('login-screen').classList.add('hidden');$('app-screen').classList.add('active');$('avatar-btn').textContent=user.email.charAt(0);$('dropdown-email').textContent=user.email;if(!mapInitialized){initMap();mapInitialized=true}loadFromSupabase()}
+        function switchToLogin(){currentUser=null;$('login-screen').classList.remove('hidden');$('app-screen').classList.remove('active');$('login-email').value='';$('login-password').value='';$('signup-email').value='';$('signup-password').value='';$('signup-password-confirm').value='';setMsg('login-msg','');setMsg('signup-msg','');$('login-card').classList.remove('hidden');$('signup-card').classList.add('hidden')}
+        function setMsg(id,msg,type){const el=$(id);el.textContent=msg;el.className='login-msg '+(type||'')}
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
+        async function loadFromSupabase(){const{data,error}=await supabase.from('cafes').select('*').order('created_at',{ascending:true});if(error){console.error(error);return}cafes=data||[];renderCurrentView();renderMarkers()}
+        async function loadComments(cafeId){const{data,error}=await supabase.from('comments').select('*').eq('cafe_id',cafeId).order('created_at',{ascending:true});if(error)return[];return data||[]}
+        async function loadAllComments(){const{data,error}=await supabase.from('comments').select('*').order('created_at',{ascending:false});if(error)return[];return data||[]}
 
-        function showLoading() {
-            let el = document.getElementById('loading-overlay');
-            if (!el) {
-                el = document.createElement('div');
-                el.id = 'loading-overlay';
-                el.className = 'loading-overlay';
-                el.innerHTML = '<div class="loading-spinner"></div>';
-                document.body.appendChild(el);
-            }
-        }
+        function renderCurrentView(){if(currentTab==='list')renderList();else if(currentTab==='feed')renderFeed()}
 
-        function hideLoading() {
-            const el = document.getElementById('loading-overlay');
-            if (el) el.remove();
-        }
+        function renderList(){$('view-list').innerHTML=cafes.length===0?'<p class="empty-msg">カフェを登録してください</p>':cafes.map(c=>{const t=[];if(c.wifi===true)t.push('Wifi');if(c.power===true)t.push('電源');if(c.parking===true)t.push('駐車場');return`<div class="cafe-card" data-id="${c.id}"><div class="cafe-card-name">${esc(c.name)}</div><div class="cafe-card-addr">${esc(c.address||'')}</div>${t.length?`<div class="cafe-card-meta">${t.map(x=>`<span class="cafe-card-tag">${x}</span>`).join('')}</div>`:''}</div>`}).join('');$('view-list').querySelectorAll('.cafe-card').forEach(c=>c.addEventListener('click',()=>{const id=Number(c.dataset.id);openThread(id)}))}
 
-        function setLoginMsg(id, msg, type) {
-            const el = $(id);
-            el.textContent = msg;
-            el.className = 'login-msg ' + (type || '');
-        }
-
-        function switchToApp(user) {
-            currentUser = user;
-            $('login-screen').classList.add('hidden');
-            $('app-screen').classList.add('active');
-            $('avatar-btn').textContent = user.email.charAt(0);
-            $('dropdown-email').textContent = user.email;
-            if (!mapInitialized) {
-                initMap();
-                mapInitialized = true;
-            }
-            loadFromSupabase();
-        }
-
-        function switchToLogin() {
-            currentUser = null;
-            $('login-screen').classList.remove('hidden');
-            $('app-screen').classList.remove('active');
-            $('login-email').value = '';
-            $('login-password').value = '';
-            $('signup-email').value = '';
-            $('signup-password').value = '';
-            $('signup-password-confirm').value = '';
-            setLoginMsg('login-msg', '');
-            setLoginMsg('signup-msg', '');
-            $('login-card').classList.remove('hidden');
-            $('signup-card').classList.add('hidden');
-        }
-
-        async function loadFromSupabase() {
-            const { data, error } = await supabase.from('cafes').select('*').order('created_at', { ascending: true });
-            if (error) { console.error('Supabase load error:', error); return; }
-            cafes = data || [];
-            renderMarkers();
-            renderList();
-        }
-
-        async function loadComments(cafeId) {
-            const { data, error } = await supabase.from('comments').select('*').eq('cafe_id', cafeId).order('created_at', { ascending: true });
-            if (error) { console.error('Comments load error:', error); return []; }
-            return data || [];
-        }
-
-        window.likeCafe = async function(cafeId) {
-            if (!currentUser) return;
-            cafeId = Number(cafeId);
-            const cafe = cafes.find(c => c.id === cafeId);
-            if (!cafe) return;
-            const newCount = (cafe.like_count || 0) + 1;
-            const { error } = await supabase.from('cafes').update({ like_count: newCount }).eq('id', cafeId);
-            if (error) { console.error('Like error:', error); return; }
-            await loadFromSupabase();
-            const marker = markers.find(m => m.getPopup() && m.getPopup().isOpen());
-            if (marker) {
-                const updatedCafe = cafes.find(c => c.id === cafeId);
-                if (updatedCafe) {
-                    const comments = await loadComments(cafeId);
-                    marker.setPopupContent(buildPopupHtml(updatedCafe, comments));
-                }
-            }
-        }
-
-        window.postComment = async function(cafeId) {
-            if (!currentUser) return;
-            cafeId = Number(cafeId);
-            const nickEl = $(`comment-nick-${cafeId}`);
-            const textEl = $(`comment-text-${cafeId}`);
-            if (!nickEl || !textEl) return;
-            const nickname = nickEl.value.trim();
-            const text = textEl.value.trim();
-            if (!nickname || !text) return;
-            const { error } = await supabase.from('comments').insert([{ cafe_id: cafeId, nickname, text }]);
-            if (error) { console.error('Comment insert error:', error); return; }
-            nickEl.value = '';
-            textEl.value = '';
-            await loadFromSupabase();
-            const marker = markers.find(m => m.getPopup() && m.getPopup().isOpen());
-            if (marker) {
-                const updatedCafe = cafes.find(c => c.id === cafeId);
-                if (updatedCafe) {
-                    const comments = await loadComments(cafeId);
-                    marker.setPopupContent(buildPopupHtml(updatedCafe, comments));
-                }
-            }
-        };
-
-        function buildPopupHtml(cafe, comments) {
-            const infoTags = [];
-            if (cafe.hours) infoTags.push(`<span class="popup-tag">${escapeHtml(cafe.hours)}</span>`);
-            if (cafe.wifi === true) infoTags.push('<span class="popup-tag yes">Wifi あり</span>');
-            else if (cafe.wifi === false) infoTags.push('<span class="popup-tag no">Wifi なし</span>');
-            if (cafe.power === true) infoTags.push('<span class="popup-tag yes">電源 あり</span>');
-            else if (cafe.power === false) infoTags.push('<span class="popup-tag no">電源 なし</span>');
-            if (cafe.parking === true) infoTags.push('<span class="popup-tag yes">駐車場 あり</span>');
-            else if (cafe.parking === false) infoTags.push('<span class="popup-tag no">駐車場 なし</span>');
-            const likeCount = cafe.like_count || 0;
-            const commentHtml = comments.slice(0, 3).map(c => `<div class="popup-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('');
-            const loggedIn = !!currentUser;
-            return `
-                <div class="popup-inner">
-                    <div class="popup-name">${escapeHtml(cafe.name)}</div>
-                    <div class="popup-addr">${escapeHtml(cafe.address || '')}</div>
-                    <div class="popup-comment">${escapeHtml(cafe.comment || '')}</div>
-                    ${infoTags.length ? `<div class="popup-info">${infoTags.join('')}</div>` : ''}
-                    ${loggedIn ? `
-                        <div class="popup-like">
-                            <button class="popup-like-btn" onclick="likeCafe('${cafe.id}')">👍 いいね</button>
-                            <span class="popup-like-count">${likeCount}</span>
-                        </div>
-                    ` : `<div class="popup-like"><span class="popup-like-count">👍 ${likeCount}</span></div>`}
-                    <div class="popup-comments">
-                        <div class="popup-comments-title">コメント (${comments.length})</div>
-                        ${commentHtml || '<div class="popup-comment-item">まだコメントはありません</div>'}
-                        ${loggedIn ? `
-                            <div class="popup-comment-form">
-                                <input type="text" class="popup-comment-input" id="comment-nick-${cafe.id}" placeholder="名前" style="width:60px;">
-                                <input type="text" class="popup-comment-input" id="comment-text-${cafe.id}" placeholder="コメント...">
-                                <button class="popup-comment-btn" onclick="postComment('${cafe.id}')">投稿</button>
-                            </div>
-                        ` : ''}
+        async function renderFeed(){
+            const allComments=await loadAllComments();
+            const cafeMap={};cafes.forEach(c=>{cafeMap[c.id]=c});
+            const threads=cafes.map(c=>{const cc=allComments.filter(x=>x.cafe_id===c.id);return{cafe:c,comments:cc,latest:cc.length>0?cc[cc.length-1]:null,count:cc.length,likeCount:c.like_count||0}});
+            let sorted=[...threads];
+            if(feedSort==='newest')sorted.sort((a,b)=>{const ta=a.latest?a.latest.created_at:a.cafe.created_at;const tb=b.latest?b.latest.created_at:b.cafe.created_at;return new Date(tb)-new Date(ta)});
+            else sorted.sort((a,b)=>b.likeCount-a.likeCount||b.count-a.count);
+            $('view-feed').innerHTML=`
+                <div class="feed-sort"><button class="feed-sort-btn ${feedSort==='newest'?'active':''}" onclick="setFeedSort('newest')">🕐 新しい順</button><button class="feed-sort-btn ${feedSort==='popular'?'active':''}" onclick="setFeedSort('popular')">👍 いいね順</button></div>
+                ${sorted.length===0?'<p class="empty-msg">まだカフェがありません</p>':sorted.map(t=>`
+                    <div class="feed-card" onclick="openThread(${t.cafe.id})">
+                        <div class="feed-card-header"><div class="feed-card-icon">☕</div><div><div class="feed-card-title">${esc(t.cafe.name)}</div></div></div>
+                        ${t.latest?`<div class="feed-card-latest"><strong>${esc(t.latest.nickname)}</strong>: ${esc(t.latest.text)}</div>`:'<div class="feed-card-latest" style="color:#98A2B3">まだコメントがありません</div>'}
+                        <div class="feed-card-footer"><span class="feed-card-stat">💬 ${t.count}件</span><span class="feed-card-stat">👍 ${t.likeCount}</span><span class="feed-card-stat">🕐 ${t.latest?timeAgo(t.latest.created_at):timeAgo(t.cafe.created_at)}</span></div>
                     </div>
-                    ${loggedIn ? `
-                        <div class="popup-btns" style="margin-top:8px;">
-                            <button class="popup-btn popup-btn-edit" onclick="editCafe('${cafe.id}')">編集</button>
-                            <button class="popup-btn popup-btn-del" onclick="deleteCafe('${cafe.id}')">削除</button>
-                        </div>
-                    ` : ''}
+                `).join('')}`;
+        }
+
+        window.setFeedSort=function(s){feedSort=s;renderFeed()};
+
+        async function openThread(cafeId){
+            const cafe=cafes.find(c=>c.id===cafeId);if(!cafe)return;
+            currentCafeId=cafeId;
+            const comments=await loadComments(cafeId);
+            const tags=[];
+            if(cafe.hours)tags.push(`<span class="thread-cafe-tag">${esc(cafe.hours)}</span>`);
+            if(cafe.wifi===true)tags.push('<span class="thread-cafe-tag yes">Wifi あり</span>');
+            else if(cafe.wifi===false)tags.push('<span class="thread-cafe-tag no">Wifi なし</span>');
+            if(cafe.power===true)tags.push('<span class="thread-cafe-tag yes">電源 あり</span>');
+            else if(cafe.power===false)tags.push('<span class="thread-cafe-tag no">電源 なし</span>');
+            if(cafe.parking===true)tags.push('<span class="thread-cafe-tag yes">駐車場 あり</span>');
+            else if(cafe.parking===false)tags.push('<span class="thread-cafe-tag no">駐車場 なし</span>');
+
+            const replies=comments.filter(c=>c.parent_id);
+            const topComments=comments.filter(c=>!c.parent_id);
+
+            $('view-thread').innerHTML=`
+                <button class="thread-back" onclick="showTab('${currentTab==='feed'?'feed':'list'}')">← 戻る</button>
+                <div class="thread-cafe-info">
+                    <div class="thread-cafe-name">${esc(cafe.name)}</div>
+                    <div class="thread-cafe-addr">${esc(cafe.address||'')}</div>
+                    ${tags.length?`<div class="thread-cafe-tags">${tags.join('')}</div>`:''}
+                    <div class="thread-cafe-actions">
+                        <button class="thread-cafe-action" onclick="jumpToCafe(${cafe.id})">📍 地図で見る</button>
+                        ${currentUser?`<button class="thread-cafe-action" onclick="likeCafe(${cafe.id})">👍 いいね ${cafe.like_count||0}</button>`:''}
+                    </div>
                 </div>
+                <div id="thread-comments">
+                    ${topComments.length===0?'<p class="empty-msg">まだ書き込みがありません</p>':''}
+                    ${topComments.map(c=>{
+                        const childReplies=replies.filter(r=>r.parent_id===c.id);
+                        return`
+                            <div class="thread-comment">
+                                <div class="thread-comment-header"><span class="thread-comment-user">${esc(c.nickname)}</span><span class="thread-comment-time">${timeAgo(c.created_at)}</span></div>
+                                <div class="thread-comment-text">${esc(c.text)}</div>
+                                <div class="thread-comment-actions">
+                                    ${currentUser?`<button class="thread-comment-action" onclick="likeComment(${c.id})">👍 ${c.like_count||0}</button>`:`<span class="thread-comment-action">👍 ${c.like_count||0}</span>`}
+                                    ${currentUser?`<button class="thread-comment-action" onclick="showReplyForm(${c.id})">返信</button>`:''}
+                                    ${currentUser&&c.user_id===currentUser.id?`<button class="thread-comment-action" onclick="deleteComment(${c.id},${cafe.id})" style="color:#D92D20">削除</button>`:''}
+                                </div>
+                                <div id="reply-form-${c.id}"></div>
+                                ${childReplies.length>0?`<div class="thread-comment-reply">${childReplies.map(r=>`
+                                    <div class="thread-comment">
+                                        <div class="thread-comment-header"><span class="thread-comment-user">${esc(r.nickname)}</span><span class="thread-comment-time">${timeAgo(r.created_at)}</span></div>
+                                        <div class="thread-comment-text">${esc(r.text)}</div>
+                                    </div>
+                                `).join('')}</div>`:''}
+                            </div>`;
+                    }).join('')}
+                </div>
+                ${currentUser?`
+                <div style="padding:12px 0;border-top:1.5px solid #E4E7EC;margin-top:8px">
+                    <div style="display:flex;gap:6px">
+                        <input type="text" class="thread-reply-input" id="thread-nickname" placeholder="名前" style="width:80px">
+                        <input type="text" class="thread-reply-input" id="thread-text" placeholder="書き込む...">
+                        <button class="thread-reply-btn" onclick="postThreadComment(${cafe.id})">投稿</button>
+                    </div>
+                </div>`:''}
             `;
+            switchView('thread');
         }
 
-        function initMap() {
-            map = L.map('map', { zoomControl: false }).setView([35.6595, 139.6990], 15);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
-            }).addTo(map);
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            map.on('click', function(e) {
-                openRightPanel();
-                $('cafe-lat').value = e.latlng.lat.toFixed(6);
-                $('cafe-lng').value = e.latlng.lng.toFixed(6);
-                $('form-save').textContent = '登録';
-                $('right-title').textContent = 'カフェを追加';
-            });
-        }
+        window.showTab=function(tab){currentTab=tab;$('tab-list').classList.toggle('active',tab==='list');$('tab-feed').classList.toggle('active',tab==='feed');if(tab==='list')renderList();else renderFeed();switchView(tab)};
+        window.openThread=openThread;
 
-        function renderList() {
-            $('view-list').innerHTML = cafes.length === 0
-                ? '<p style="color:#98A2B3;font-size:0.85rem;text-align:center;padding:20px 0;">カフェを登録してください</p>'
-                : cafes.map(c => {
-                    const tags = [];
-                    if (c.wifi === true) tags.push('Wifi');
-                    if (c.power === true) tags.push('電源');
-                    if (c.parking === true) tags.push('駐車場');
-                    return `
-                        <div class="cafe-card" data-id="${c.id}">
-                            <div class="cafe-card-name">${escapeHtml(c.name)}</div>
-                            <div class="cafe-card-addr">${escapeHtml(c.address || '')}</div>
-                            ${c.comment ? `<div class="cafe-card-comment">${escapeHtml(c.comment)}</div>` : ''}
-                            ${tags.length ? `<div class="cafe-card-meta">${tags.map(t => `<span class="cafe-card-tag">${t}</span>`).join('')}</div>` : ''}
-                        </div>
-                    `;
-                }).join('');
-            $('view-list').querySelectorAll('.cafe-card').forEach(card => {
-                card.addEventListener('click', () => showDetail(card.dataset.id));
-            });
-        }
+        window.jumpToCafe=function(id){const c=cafes.find(x=>x.id===id);if(!c)return;map.setView([c.lat,c.map?.lng||c.lng],16);markers.forEach(m=>{m.closePopup()});const idx=cafes.findIndex(x=>x.id===id);if(markers[idx])markers[idx].openPopup()};
 
-        async function renderMarkers() {
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-            for (const cafe of cafes) {
-                const marker = L.marker([cafe.lat, cafe.lng]).addTo(map);
-                const comments = await loadComments(cafe.id);
-                marker.bindPopup(buildPopupHtml(cafe, comments), { closeButton: true, maxWidth: 300 });
-                markers.push(marker);
-            }
-        }
-
-        async function showDetail(id) {
-            id = Number(id);
-            const cafe = cafes.find(c => c.id === id);
-            if (!cafe) return;
-            currentCafeId = id;
-            $('detail-name').textContent = cafe.name;
-            $('detail-addr').textContent = cafe.address || '';
-            $('detail-comment').textContent = cafe.comment || '';
-            const tags = [];
-            if (cafe.hours) tags.push(`<span class="detail-tag">${escapeHtml(cafe.hours)}</span>`);
-            if (cafe.wifi === true) tags.push('<span class="detail-tag yes">Wifi あり</span>');
-            else if (cafe.wifi === false) tags.push('<span class="detail-tag no">Wifi なし</span>');
-            if (cafe.power === true) tags.push('<span class="detail-tag yes">電源 あり</span>');
-            else if (cafe.power === false) tags.push('<span class="detail-tag no">電源 なし</span>');
-            if (cafe.parking === true) tags.push('<span class="detail-tag yes">駐車場 あり</span>');
-            else if (cafe.parking === false) tags.push('<span class="detail-tag no">駐車場 なし</span>');
-            $('detail-tags').innerHTML = tags.join('');
-            $('detail-like').textContent = `👍 いいね: ${cafe.like_count || 0}`;
-            const comments = await loadComments(id);
-            $('detail-comments').innerHTML = `
-                <div class="detail-comments-title">コメント (${comments.length})</div>
-                ${comments.length > 0 ? comments.map(c => `<div class="detail-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('') : '<div class="detail-comment-item">まだコメントはありません</div>'}
-            `;
-            $('detail-btns').style.display = currentUser ? '' : 'none';
-            $('left-title').textContent = cafe.name;
-            $('view-list').classList.remove('active');
-            $('view-detail').classList.add('active');
-        }
-
-        function showList() {
-            $('view-detail').classList.remove('active');
-            $('view-list').classList.add('active');
-            $('left-title').textContent = 'カフェ一覧';
-            renderList();
-        }
-
-        function openRightPanel() { $('panel-right').classList.add('open'); }
-        function closeRightPanel() { $('panel-right').classList.remove('open'); resetForm(); }
-        function resetForm() {
-            $('cafe-form').reset();
-            $('edit-id').value = '';
-            $('form-save').textContent = '登録';
-            $('right-title').textContent = 'カフェを追加';
-        }
-
-        window.editCafe = function(id) {
-            id = Number(id);
-            const cafe = cafes.find(c => c.id === id);
-            if (!cafe) return;
-            map.closePopup();
-            currentCafeId = id;
-            $('edit-id').value = id;
-            $('cafe-name').value = cafe.name;
-            $('cafe-address').value = cafe.address || '';
-            $('cafe-lat').value = cafe.lat;
-            $('cafe-lng').value = cafe.lng;
-            $('cafe-comment').value = cafe.comment || '';
-            $('cafe-hours').value = cafe.hours || '';
-            $('cafe-wifi').value = cafe.wifi === true ? 'true' : cafe.wifi === false ? 'false' : '';
-            $('cafe-power').value = cafe.power === true ? 'true' : cafe.power === false ? 'false' : '';
-            $('cafe-parking').value = cafe.parking === true ? 'true' : cafe.parking === false ? 'false' : '';
-            $('form-save').textContent = '更新';
-            $('right-title').textContent = 'カフェを編集';
-            openRightPanel();
+        window.likeCafe=async function(id){
+            if(!currentUser)return;
+            const cafe=cafes.find(c=>c.id===id);if(!cafe)return;
+            const n=(cafe.like_count||0)+1;
+            await supabase.from('cafes').update({like_count:n}).eq('id',id);
+            cafe.like_count=n;renderMarkers();openThread(id);
         };
 
-        window.deleteCafe = async function(id) {
-            id = Number(id);
-            if (!confirm('このカフェを削除してもよろしいですか？')) return;
-            map.closePopup();
-            showLoading();
-            const { error } = await supabase.from('cafes').delete().eq('id', id);
-            hideLoading();
-            if (error) { alert('削除エラー: ' + error.message); return; }
-            await supabase.from('comments').delete().eq('cafe_id', id);
-            await loadFromSupabase();
-            showList();
+        window.likeComment=async function(commentId){
+            if(!currentUser)return;
+            const{data}=await supabase.from('comments').select('like_count').eq('id',commentId).single();
+            const n=(data?.like_count||0)+1;
+            await supabase.from('comments').update({like_count:n}).eq('id',commentId);
+            openThread(currentCafeId);
         };
 
-        function toggleLeftPanel() {
-            const panel = $('panel-left');
-            const tab = $('panel-tab');
-            const toggle = $('panel-toggle');
-            if (panel.classList.contains('open')) {
-                panel.classList.remove('open'); tab.classList.add('visible'); toggle.innerHTML = '&#9654;';
-            } else {
-                panel.classList.add('open'); tab.classList.remove('visible'); toggle.innerHTML = '&#9664;';
-            }
+        window.postThreadComment=async function(cafeId){
+            if(!currentUser)return;
+            const nick=$('thread-nickname').value.trim();const text=$('thread-text').value.trim();
+            if(!nick||!text)return;
+            await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,user_id:currentUser.id}]);
+            openThread(cafeId);
+        };
+
+        window.showReplyForm=async function(parentId){
+            const el=$(`reply-form-${parentId}`);if(!el)return;
+            el.innerHTML=`<div class="thread-reply-form"><input type="text" class="thread-reply-input" id="reply-nick-${parentId}" placeholder="名前" style="width:80px"><input type="text" class="thread-reply-input" id="reply-text-${parentId}" placeholder="返信..."><button class="thread-reply-btn" onclick="postReply(${parentId},${currentCafeId})">返信</button></div>`;
+        };
+
+        window.postReply=async function(parentId,cafeId){
+            if(!currentUser)return;
+            const nick=$(`reply-nick-${parentId}`).value.trim();const text=$(`reply-text-${parentId}`).value.trim();
+            if(!nick||!text)return;
+            await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,parent_id:parentId,user_id:currentUser.id}]);
+            openThread(cafeId);
+        };
+
+        window.deleteComment=async function(commentId,cafeId){
+            if(!confirm('この書き込みを削除しますか？'))return;
+            await supabase.from('comments').delete().eq('id',commentId);
+            openThread(cafeId);
+        };
+
+        function switchView(name){['view-list','view-feed','view-thread'].forEach(v=>$(v).classList.remove('active'));const map={list:'view-list',feed:'view-feed',thread:'view-thread'};$(map[name]).classList.add('active')}
+
+        function buildPopupHtml(cafe){
+            const info=[];
+            if(cafe.hours)info.push(`<span class="popup-tag">${esc(cafe.hours)}</span>`);
+            if(cafe.wifi===true)info.push('<span class="popup-tag yes">Wifi あり</span>');else if(cafe.wifi===false)info.push('<span class="popup-tag no">Wifi なし</span>');
+            if(cafe.power===true)info.push('<span class="popup-tag yes">電源 あり</span>');else if(cafe.power===false)info.push('<span class="popup-tag no">電源 なし</span>');
+            if(cafe.parking===true)info.push('<span class="popup-tag yes">駐車場 あり</span>');else if(cafe.parking===false)info.push('<span class="popup-tag no">駐車場 なし</span>');
+            return`<div class="popup-inner"><div class="popup-name">${esc(cafe.name)}</div><div class="popup-addr">${esc(cafe.address||'')}</div><div class="popup-comment">${esc(cafe.comment||'')}</div>${info.length?`<div class="popup-info">${info.join('')}</div>`:''}<button class="popup-thread-link" onclick="openThread(${cafe.id})">💬 スレッドを見る</button>${currentUser?`<div class="popup-btns"><button class="popup-btn popup-btn-edit" onclick="editCafe(${cafe.id})">編集</button><button class="popup-btn popup-btn-del" onclick="deleteCafe(${cafe.id})">削除</button></div>`:''}</div>`;
         }
 
-        $('panel-toggle').addEventListener('click', toggleLeftPanel);
-        $('panel-tab').addEventListener('click', toggleLeftPanel);
-        $('fab-add').addEventListener('click', () => { map.closePopup(); resetForm(); openRightPanel(); });
-        $('right-close').addEventListener('click', closeRightPanel);
-        $('detail-back').addEventListener('click', showList);
-        $('detail-edit').addEventListener('click', () => editCafe(currentCafeId));
-        $('detail-delete').addEventListener('click', () => deleteCafe(currentCafeId));
-        $('form-cancel').addEventListener('click', closeRightPanel);
+        function initMap(){
+            map=L.map('map',{zoomControl:false}).setView([35.6595,139.6990],15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org/copyright">OSM</a>'}).addTo(map);
+            L.control.zoom({position:'topright'}).addTo(map);
+            map.on('click',function(e){if(!currentUser)return;openRightPanel();$('cafe-lat').value=e.latlng.lat.toFixed(6);$('cafe-lng').value=e.latlng.lng.toFixed(6);$('form-save').textContent='登録';$('right-title').textContent='カフェを追加'});
+        }
 
-        $('avatar-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            $('avatar-dropdown').classList.toggle('open');
-        });
-        document.addEventListener('click', () => $('avatar-dropdown').classList.remove('open'));
+        async function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers=[];for(const cafe of cafes){const marker=L.marker([cafe.lat,cafe.lng]).addTo(map);marker.bindPopup(buildPopupHtml(cafe),{closeButton:true,maxWidth:300});markers.push(marker)}}
 
-        $('cafe-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const editId = $('edit-id').value ? Number($('edit-id').value) : null;
-            const name = $('cafe-name').value.trim();
-            const address = $('cafe-address').value.trim();
-            const lat = parseFloat($('cafe-lat').value);
-            const lng = parseFloat($('cafe-lng').value);
-            const comment = $('cafe-comment').value.trim();
-            const hours = $('cafe-hours').value.trim();
-            const wifi = $('cafe-wifi').value === '' ? null : $('cafe-wifi').value === 'true';
-            const power = $('cafe-power').value === '' ? null : $('cafe-power').value === 'true';
-            const parking = $('cafe-parking').value === '' ? null : $('cafe-parking').value === 'true';
-            if (!name || isNaN(lat) || isNaN(lng)) return;
+        function openRightPanel(){$('panel-right').classList.add('open')}
+        function closeRightPanel(){$('panel-right').classList.remove('open');resetForm()}
+        function resetForm(){$('cafe-form').reset();$('edit-id').value='';$('form-save').textContent='登録';$('right-title').textContent='カフェを追加'}
+
+        window.editCafe=function(id){id=Number(id);const c=cafes.find(x=>x.id===id);if(!c)return;map.closePopup();$('edit-id').value=id;$('cafe-name').value=c.name;$('cafe-address').value=c.address||'';$('cafe-lat').value=c.lat;$('cafe-lng').value=c.lng;$('cafe-comment').value=c.comment||'';$('cafe-hours').value=c.hours||'';$('cafe-wifi').value=c.wifi===true?'true':c.wifi===false?'false':'';$('cafe-power').value=c.power===true?'true':c.power===false?'false':'';$('cafe-parking').value=c.parking===true?'true':c.parking===false?'false':'';$('form-save').textContent='更新';$('right-title').textContent='カフェを編集';openRightPanel()};
+        window.deleteCafe=async function(id){if(!confirm('削除しますか？'))return;map.closePopup();showLoading();await supabase.from('cafes').delete().eq('id',id);await supabase.from('comments').delete().eq('cafe_id',id);await loadFromSupabase();hideLoading()};
+
+        function toggleLeftPanel(){const p=$('panel-left'),t=$('panel-tab'),g=$('panel-toggle');if(p.classList.contains('open')){p.classList.remove('open');t.classList.add('visible');g.innerHTML='&#9654;'}else{p.classList.add('open');t.classList.remove('visible');g.innerHTML='&#9664;'}}
+        $('panel-toggle').addEventListener('click',toggleLeftPanel);$('panel-tab').addEventListener('click',toggleLeftPanel);
+        $('fab-add').addEventListener('click',()=>{if(!currentUser)return;map.closePopup();resetForm();openRightPanel()});
+        $('right-close').addEventListener('click',closeRightPanel);$('form-cancel').addEventListener('click',closeRightPanel);
+        $('tab-list').addEventListener('click',()=>showTab('list'));$('tab-feed').addEventListener('click',()=>showTab('feed'));
+        $('avatar-btn').addEventListener('click',e=>{e.stopPropagation();$('avatar-dropdown').classList.toggle('open')});
+        document.addEventListener('click',()=>$('avatar-dropdown').classList.remove('open'));
+
+        $('cafe-form').addEventListener('submit',async e=>{
+            e.preventDefault();if(!currentUser)return;
+            const editId=$('edit-id').value?Number($('edit-id').value):null;
+            const name=$('cafe-name').value.trim(),address=$('cafe-address').value.trim(),lat=parseFloat($('cafe-lat').value),lng=parseFloat($('cafe-lng').value),comment=$('cafe-comment').value.trim(),hours=$('cafe-hours').value.trim();
+            const wifi=$('cafe-wifi').value===''?null:$('cafe-wifi').value==='true',power=$('cafe-power').value===''?null:$('cafe-power').value==='true',parking=$('cafe-parking').value===''?null:$('cafe-parking').value==='true';
+            if(!name||isNaN(lat)||isNaN(lng))return;
             showLoading();
-            if (editId) {
-                await supabase.from('cafes').update({ name, address, lat, lng, comment, hours, wifi, power, parking }).eq('id', editId);
-            } else {
-                await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking, user_id: currentUser.id }]);
-            }
-            await loadFromSupabase();
-            hideLoading();
-            closeRightPanel();
+            if(editId)await supabase.from('cafes').update({name,address,lat,lng,comment,hours,wifi,parking}).eq('id',editId);
+            else await supabase.from('cafes').insert([{name,address,lat,lng,comment,hours,wifi,parking,user_id:currentUser.id}]);
+            await loadFromSupabase();hideLoading();closeRightPanel();
         });
 
-        // --- Auth ---
-        $('goto-signup').addEventListener('click', () => {
-            setLoginMsg('login-msg', '');
-            $('login-card').classList.add('hidden');
-            $('signup-card').classList.remove('hidden');
-        });
+        $('goto-signup').addEventListener('click',()=>{setMsg('login-msg','');$('login-card').classList.add('hidden');$('signup-card').classList.remove('hidden')});
+        $('goto-login').addEventListener('click',()=>{setMsg('signup-msg','');$('signup-card').classList.add('hidden');$('login-card').classList.remove('hidden')});
+        $('btn-login').addEventListener('click',async()=>{setMsg('login-msg','');const e=$('login-email').value.trim(),p=$('login-password').value;if(!e||!p){setMsg('login-msg','入力してください','error');return}setMsg('login-msg','ログイン中...');const{error}=await supabase.auth.signInWithPassword({email:e,password:p});if(error)setMsg('login-msg',error.message,'error')});
+        $('btn-signup').addEventListener('click',async()=>{setMsg('signup-msg','');const e=$('signup-email').value.trim(),p=$('signup-password').value,c=$('signup-password-confirm').value;if(!e||!p){setMsg('signup-msg','入力してください','error');return}if(p.length<6){setMsg('signup-msg','パスワードは6文字以上','error');return}if(p!==c){setMsg('signup-msg','パスワードが一致しません','error');return}setMsg('signup-msg','作成中...');const{error}=await supabase.auth.signUp({email:e,password:p});if(error){setMsg('signup-msg',error.message,'error');return}setMsg('signup-msg','作成完了！ログインしてください。','success')});
+        $('btn-logout').addEventListener('click',async()=>{$('avatar-dropdown').classList.remove('open');await supabase.auth.signOut()});
+        $('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-login').click()});
+        $('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-login').click()});
+        $('signup-password-confirm').addEventListener('keydown',e=>{if(e.key==='Enter')$('btn-signup').click()});
 
-        $('goto-login').addEventListener('click', () => {
-            setLoginMsg('signup-msg', '');
-            $('signup-card').classList.add('hidden');
-            $('login-card').classList.remove('hidden');
-        });
-
-        $('btn-login').addEventListener('click', async () => {
-            setLoginMsg('login-msg', '');
-            const email = $('login-email').value.trim();
-            const password = $('login-password').value;
-            if (!email || !password) { setLoginMsg('login-msg', 'メールアドレスとパスワードを入力してください', 'error'); return; }
-            setLoginMsg('login-msg', 'ログイン中...', '');
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) { setLoginMsg('login-msg', error.message, 'error'); return; }
-        });
-
-        $('btn-signup').addEventListener('click', async () => {
-            setLoginMsg('signup-msg', '');
-            const email = $('signup-email').value.trim();
-            const password = $('signup-password').value;
-            const confirm = $('signup-password-confirm').value;
-            if (!email || !password) { setLoginMsg('signup-msg', 'メールアドレスとパスワードを入力してください', 'error'); return; }
-            if (password.length < 6) { setLoginMsg('signup-msg', 'パスワードは6文字以上で設定してください', 'error'); return; }
-            if (password !== confirm) { setLoginMsg('signup-msg', 'パスワードが一致しません', 'error'); return; }
-            setLoginMsg('signup-msg', 'アカウントを作成中...', '');
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) { setLoginMsg('signup-msg', error.message, 'error'); return; }
-            setLoginMsg('signup-msg', 'アカウントを作成しました！ログイン画面に戻ってログインしてください。', 'success');
-            $('signup-email').value = '';
-            $('signup-password').value = '';
-            $('signup-password-confirm').value = '';
-        });
-
-        $('btn-logout').addEventListener('click', async () => {
-            $('avatar-dropdown').classList.remove('open');
-            await supabase.auth.signOut();
-        });
-
-        $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
-        $('login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
-        $('signup-password-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-signup').click(); });
-
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session?.user) {
-                switchToApp(session.user);
-            } else {
-                switchToLogin();
-            }
-        });
-
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-            switchToApp(session.user);
-        } else {
-            switchToLogin();
-        }
+        supabase.auth.onAuthStateChange((e,s)=>{if(s?.user)switchToApp(s.user);else switchToLogin()});
+        const{data:{session}}=await supabase.auth.getSession();
+        if(session?.user)switchToApp(session.user);else switchToLogin();
     </script>
 </body>
 </html>
