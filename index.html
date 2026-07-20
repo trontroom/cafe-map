@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>カフェマップ - 渋谷</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; overflow: hidden; }
+
+        #header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); z-index: 1002; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 12px rgba(10,122,194,0.3); }
+        #header h1 { font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+
+        #map { position: fixed; top: 52px; left: 0; width: 100%; height: calc(100% - 52px); z-index: 1; }
+
+        /* --- Loading --- */
+        .loading-overlay { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 1003; display: flex; align-items: center; justify-content: center; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid #E4E7EC; border-top-color: #0A7AC2; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- FAB --- */
+        .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 16px; border: none; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; cursor: pointer; z-index: 1000; box-shadow: 0 4px 20px rgba(10,122,194,0.4); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
+        .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(10,122,194,0.5); }
+        .fab:active { transform: scale(0.95); }
+
+        /* --- Panel Base --- */
+        .panel { position: fixed; top: 12px; bottom: 12px; background: #fff; border-radius: 16px; z-index: 1001; box-shadow: 0 8px 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #E4E7EC; flex-shrink: 0; }
+        .panel-header h2 { font-size: 1rem; font-weight: 700; color: #1D2939; }
+        .panel-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: #F2F4F7; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 16px; transition: background 0.15s; flex-shrink: 0; }
+        .panel-close:hover { background: #E4E7EC; }
+        .panel-body { padding: 12px 16px 16px; overflow-y: auto; flex: 1; border-radius: 0 0 16px 16px; }
+
+        /* --- Left Panel (List) --- */
+        .panel-left { left: 12px; top: 64px; bottom: 12px; width: 340px; transform: translateX(-120%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+        .panel-left.open { transform: translateX(0); }
+
+        /* --- Panel Toggle (on panel right edge) --- */
+        .panel-toggle { position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 18px; height: 48px; background: #fff; border: none; border-radius: 0 8px 8px 0; box-shadow: 4px 0 12px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 11px; transition: all 0.2s; z-index: 10; }
+        .panel-toggle:hover { background: #F0F7FF; color: #0A7AC2; }
+
+        /* --- Collapsed Tab (left edge) --- */
+        .panel-tab { position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: 28px; height: 64px; background: #fff; border: none; border-radius: 0 10px 10px 0; box-shadow: 4px 0 16px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #0A7AC2; font-size: 16px; font-weight: 700; z-index: 1001; transition: all 0.2s; opacity: 0; pointer-events: none; }
+        .panel-tab.visible { opacity: 1; pointer-events: auto; }
+        .panel-tab:hover { width: 32px; background: #F0F7FF; }
+
+        /* --- Right Panel (Form) --- */
+        .panel-right { right: 24px; left: auto; top: 64px; bottom: 92px; width: 380px; max-width: calc(100vw - 24px); transform: scale(0); transform-origin: bottom right; opacity: 0; pointer-events: none; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease; }
+        .panel-right.open { transform: scale(1); opacity: 1; pointer-events: auto; }
+
+        /* --- Cafe List --- */
+        .cafe-card { padding: 12px 14px; border: 1.5px solid #E4E7EC; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; background: #fff; }
+        .cafe-card:hover { border-color: #0A7AC2; background: #F0F7FF; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(10,122,194,0.12); }
+        .cafe-card-name { font-size: 0.9rem; font-weight: 600; color: #1D2939; margin-bottom: 3px; }
+        .cafe-card-addr { font-size: 0.78rem; color: #667085; }
+        .cafe-card-comment { font-size: 0.78rem; color: #0A7AC2; margin-top: 3px; }
+        .cafe-card-meta { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+        .cafe-card-tag { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: #F0F7FF; color: #0A7AC2; }
+
+        /* --- Detail (inside left panel) --- */
+        .detail-name { font-size: 1.1rem; font-weight: 700; color: #1D2939; margin-bottom: 4px; }
+        .detail-addr { font-size: 0.82rem; color: #667085; margin-bottom: 10px; }
+        .detail-comment { font-size: 0.85rem; color: #344054; padding: 10px 12px; background: #F0F7FF; border-radius: 10px; border-left: 3px solid #0A7AC2; margin-bottom: 12px; line-height: 1.5; }
+        .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .detail-tag { font-size: 0.78rem; padding: 4px 10px; border-radius: 8px; background: #F0F7FF; color: #0A7AC2; font-weight: 500; }
+        .detail-tag.yes { background: #D1FAE5; color: #065F46; }
+        .detail-tag.no { background: #FEE2E2; color: #991B1B; }
+        .detail-like { font-size: 0.85rem; color: #667085; margin-bottom: 12px; }
+        .detail-comments { border-top: 1px solid #E4E7EC; padding-top: 10px; margin-top: 10px; }
+        .detail-comments-title { font-size: 0.8rem; font-weight: 600; color: #667085; margin-bottom: 6px; }
+        .detail-comment-item { font-size: 0.8rem; color: #344054; padding: 4px 0; border-bottom: 1px solid #F2F4F7; }
+        .detail-comment-item strong { color: #0A7AC2; }
+
+        /* --- Form (inside right panel) --- */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.72rem; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+        .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid #D0D5DD; border-radius: 10px; font-size: 0.85rem; font-family: inherit; color: #1D2939; background: #F9FAFB; transition: border-color 0.2s, background 0.2s; }
+        .form-input:focus { outline: none; border-color: #0A7AC2; background: #fff; box-shadow: 0 0 0 3px rgba(10,122,194,0.12); }
+        .form-input::placeholder { color: #98A2B3; }
+        .form-row { display: flex; gap: 8px; }
+        .form-row .form-group { flex: 1; }
+        .form-hint { font-size: 0.75rem; color: #98A2B3; margin-top: 4px; padding: 8px 10px; background: #F9FAFB; border-radius: 8px; border-left: 3px solid #D0D5DD; }
+
+        /* --- Buttons --- */
+        .btn-group { display: flex; gap: 8px; margin-top: 16px; }
+        .btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; box-shadow: 0 2px 8px rgba(10,122,194,0.3); }
+        .btn-primary:hover { box-shadow: 0 4px 16px rgba(10,122,194,0.4); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary { background: #F2F4F7; color: #667085; }
+        .btn-secondary:hover { background: #E4E7EC; }
+        .btn-danger { background: #FEE4E2; color: #D92D20; }
+        .btn-danger:hover { background: #FECDCA; }
+
+        /* --- Leaflet Popup --- */
+        .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; padding: 0 !important; }
+        .leaflet-popup-content { margin: 0 !important; min-width: 200px; }
+        .leaflet-popup-tip { box-shadow: none !important; }
+        .leaflet-popup-close-button { font-size: 20px !important; color: #98A2B3 !important; top: 10px !important; right: 10px !important; }
+        .popup-inner { padding: 16px; }
+        .popup-name { font-size: 1rem; font-weight: 700; color: #1D2939; margin-bottom: 6px; }
+        .popup-addr { font-size: 0.8rem; color: #667085; margin-bottom: 4px; }
+        .popup-comment { font-size: 0.85rem; color: #344054; margin-bottom: 10px; }
+        .popup-info { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .popup-tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; background: #F0F7FF; color: #0A7AC2; font-weight: 500; }
+        .popup-tag.yes { background: #D1FAE5; color: #065F46; }
+        .popup-tag.no { background: #FEE2E2; color: #991B1B; }
+        .popup-like { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .popup-like-btn { padding: 4px 12px; border-radius: 8px; border: 1.5px solid #E4E7EC; background: #fff; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
+        .popup-like-btn:hover { border-color: #0A7AC2; background: #F0F7FF; }
+        .popup-like-count { font-size: 0.85rem; color: #667085; font-weight: 600; }
+        .popup-comments { border-top: 1px solid #E4E7EC; padding-top: 8px; margin-top: 8px; }
+        .popup-comments-title { font-size: 0.75rem; font-weight: 600; color: #667085; margin-bottom: 6px; }
+        .popup-comment-item { font-size: 0.78rem; color: #344054; padding: 4px 0; border-bottom: 1px solid #F2F4F7; }
+        .popup-comment-item strong { color: #0A7AC2; }
+        .popup-comment-form { display: flex; gap: 4px; margin-top: 6px; }
+        .popup-comment-input { flex: 1; padding: 5px 8px; border: 1px solid #D0D5DD; border-radius: 6px; font-size: 0.75rem; font-family: inherit; }
+        .popup-comment-input:focus { outline: none; border-color: #0A7AC2; }
+        .popup-comment-btn { padding: 5px 10px; border: none; border-radius: 6px; background: #0A7AC2; color: #fff; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+        .popup-btns { display: flex; gap: 8px; }
+        .popup-btn { padding: 6px 14px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .popup-btn-edit { background: #E0F2FE; color: #0A7AC2; }
+        .popup-btn-edit:hover { background: #BAE6FD; }
+        .popup-btn-del { background: #FEE4E2; color: #D92D20; }
+        .popup-btn-del:hover { background: #FECDCA; }
+
+        .leaflet-control-attribution { font-size: 10px !important; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        @media (max-width: 768px) {
+            .panel-left, .panel-right { width: calc(100vw - 24px); }
+            .panel-right { right: 12px; }
+            .fab { bottom: 16px; right: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header"><h1>Cafe Map</h1></div>
+    <div id="map"></div>
+
+    <button class="panel-tab" id="panel-tab" title="一覧を展開">&#9654;</button>
+
+    <button class="fab" id="fab-add" title="カフェを追加">+</button>
+
+    <!-- Left Panel: Cafe List -->
+    <div class="panel panel-left open" id="panel-left">
+        <button class="panel-toggle" id="panel-toggle" title="一覧を格納">&#9664;</button>
+        <div class="panel-header">
+            <h2 id="left-title">カフェ一覧</h2>
+        </div>
+        <div class="panel-body">
+            <div class="view active" id="view-list"></div>
+            <div class="view" id="view-detail">
+                <div class="detail-name" id="detail-name"></div>
+                <div class="detail-addr" id="detail-addr"></div>
+                <div class="detail-comment" id="detail-comment"></div>
+                <div class="detail-tags" id="detail-tags"></div>
+                <div class="detail-like" id="detail-like"></div>
+                <div class="detail-comments" id="detail-comments"></div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="detail-back">← 一覧</button>
+                    <button class="btn btn-primary" id="detail-edit">編集</button>
+                    <button class="btn btn-danger" id="detail-delete">削除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Add/Edit Form -->
+    <div class="panel panel-right" id="panel-right">
+        <div class="panel-header">
+            <h2 id="right-title">カフェを追加</h2>
+            <button class="panel-close" id="right-close">&times;</button>
+        </div>
+        <div class="panel-body">
+            <form id="cafe-form">
+                <div class="form-group">
+                    <label>カフェ名</label>
+                    <input type="text" class="form-input" id="cafe-name" placeholder="例: スターバックス" required>
+                </div>
+                <div class="form-group">
+                    <label>住所</label>
+                    <input type="text" class="form-input" id="cafe-address" placeholder="例: 渋谷区道玄坂1-1-1">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>緯度</label>
+                        <input type="number" class="form-input" id="cafe-lat" placeholder="35.6595" step="any" required>
+                    </div>
+                    <div class="form-group">
+                        <label>経度</label>
+                        <input type="number" class="form-input" id="cafe-lng" placeholder="139.6990" step="any" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>コメント</label>
+                    <input type="text" class="form-input" id="cafe-comment" placeholder="一言コメント">
+                </div>
+                <div class="form-group">
+                    <label>営業時間</label>
+                    <input type="text" class="form-input" id="cafe-hours" placeholder="例: 9:00〜18:00">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Wifi</label>
+                        <select class="form-input" id="cafe-wifi">
+                            <option value="">不明</option>
+                            <option value="true">あり</option>
+                            <option value="false">なし</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>電源</label>
+                        <select class="form-input" id="cafe-power">
+                            <option value="">不明</option>
+                            <option value="true">あり</option>
+                            <option value="false">なし</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>駐車場</label>
+                        <select class="form-input" id="cafe-parking">
+                            <option value="">不明</option>
+                            <option value="true">あり</option>
+                            <option value="false">なし</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="form-hint">地図をクリックすると緯度・経度が自動入力されます</p>
+                <input type="hidden" id="edit-id" value="">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="form-cancel">キャンセル</button>
+                    <button type="submit" class="btn btn-primary" id="form-save">登録</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+        const SUPABASE_URL = 'https://gyeogrnfnmjrhzqikjvq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_1hTi4qYLdb2CC4fqOyCiiw_VJNO5n6j';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let cafes = [];
+        let markers = [];
+        let map;
+        let currentCafeId = null;
+
+        const $ = id => document.getElementById(id);
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showLoading() {
+            let el = document.getElementById('loading-overlay');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'loading-overlay';
+                el.className = 'loading-overlay';
+                el.innerHTML = '<div class="loading-spinner"></div>';
+                document.body.appendChild(el);
+            }
+        }
+
+        function hideLoading() {
+            const el = document.getElementById('loading-overlay');
+            if (el) el.remove();
+        }
+
+        async function loadFromSupabase() {
+            const { data, error } = await supabase.from('cafes').select('*').order('created_at', { ascending: true });
+            if (error) { console.error('Supabase load error:', error); return; }
+            cafes = data || [];
+            renderMarkers();
+            renderList();
+        }
+
+        async function loadComments(cafeId) {
+            const { data, error } = await supabase.from('comments').select('*').eq('cafe_id', cafeId).order('created_at', { ascending: true });
+            if (error) { console.error('Comments load error:', error); return []; }
+            return data || [];
+        }
+
+        window.likeCafe = async function(cafeId) {
+            cafeId = Number(cafeId);
+            const cafe = cafes.find(c => c.id === cafeId);
+            if (!cafe) return;
+            const newCount = (cafe.like_count || 0) + 1;
+            const { error } = await supabase.from('cafes').update({ like_count: newCount }).eq('id', cafeId);
+            if (error) { console.error('Like error:', error); return; }
+            await loadFromSupabase();
+            const marker = markers.find(m => {
+                const popup = m.getPopup();
+                return popup && popup.isOpen();
+            });
+            if (marker) {
+                const updatedCafe = cafes.find(c => c.id === cafeId);
+                if (updatedCafe) {
+                    const comments = await loadComments(cafeId);
+                    marker.setPopupContent(buildPopupHtml(updatedCafe, comments));
+                }
+            }
+        }
+
+        window.postComment = async function(cafeId) {
+            cafeId = Number(cafeId);
+            const nickEl = $(`comment-nick-${cafeId}`);
+            const textEl = $(`comment-text-${cafeId}`);
+            if (!nickEl || !textEl) return;
+            const nickname = nickEl.value.trim();
+            const text = textEl.value.trim();
+            if (!nickname || !text) return;
+            const { error } = await supabase.from('comments').insert([{ cafe_id: cafeId, nickname, text }]);
+            if (error) { console.error('Comment insert error:', error); return; }
+            await loadFromSupabase();
+            const marker = markers.find(m => {
+                const popup = m.getPopup();
+                return popup && popup.isOpen();
+            });
+            if (marker) {
+                const updatedCafe = cafes.find(c => c.id === cafeId);
+                if (updatedCafe) {
+                    const comments = await loadComments(cafeId);
+                    marker.setPopupContent(buildPopupHtml(updatedCafe, comments));
+                }
+            }
+        };
+
+        function buildPopupHtml(cafe, comments) {
+            const infoTags = [];
+            if (cafe.hours) infoTags.push(`<span class="popup-tag">${escapeHtml(cafe.hours)}</span>`);
+            if (cafe.wifi === true) infoTags.push('<span class="popup-tag yes">Wifi あり</span>');
+            else if (cafe.wifi === false) infoTags.push('<span class="popup-tag no">Wifi なし</span>');
+            if (cafe.power === true) infoTags.push('<span class="popup-tag yes">電源 あり</span>');
+            else if (cafe.power === false) infoTags.push('<span class="popup-tag no">電源 なし</span>');
+            if (cafe.parking === true) infoTags.push('<span class="popup-tag yes">駐車場 あり</span>');
+            else if (cafe.parking === false) infoTags.push('<span class="popup-tag no">駐車場 なし</span>');
+            const likeCount = cafe.like_count || 0;
+            const commentHtml = comments.slice(0, 3).map(c => `<div class="popup-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('');
+            return `
+                <div class="popup-inner">
+                    <div class="popup-name">${escapeHtml(cafe.name)}</div>
+                    <div class="popup-addr">${escapeHtml(cafe.address || '')}</div>
+                    <div class="popup-comment">${escapeHtml(cafe.comment || '')}</div>
+                    ${infoTags.length ? `<div class="popup-info">${infoTags.join('')}</div>` : ''}
+                    <div class="popup-like">
+                        <button class="popup-like-btn" onclick="likeCafe('${cafe.id}')">👍 いいね</button>
+                        <span class="popup-like-count">${likeCount}</span>
+                    </div>
+                    <div class="popup-comments">
+                        <div class="popup-comments-title">コメント (${comments.length})</div>
+                        ${commentHtml || '<div class="popup-comment-item">まだコメントはありません</div>'}
+                        <div class="popup-comment-form">
+                            <input type="text" class="popup-comment-input" id="comment-nick-${cafe.id}" placeholder="名前" style="width:60px;">
+                            <input type="text" class="popup-comment-input" id="comment-text-${cafe.id}" placeholder="コメント...">
+                            <button class="popup-comment-btn" onclick="postComment('${cafe.id}')">投稿</button>
+                        </div>
+                    </div>
+                    <div class="popup-btns" style="margin-top:8px;">
+                        <button class="popup-btn popup-btn-edit" onclick="editCafe('${cafe.id}')">編集</button>
+                        <button class="popup-btn popup-btn-del" onclick="deleteCafe('${cafe.id}')">削除</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initMap() {
+            map = L.map('map', { zoomControl: false }).setView([35.6595, 139.6990], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
+            }).addTo(map);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            map.on('click', function(e) {
+                openRightPanel();
+                $('cafe-lat').value = e.latlng.lat.toFixed(6);
+                $('cafe-lng').value = e.latlng.lng.toFixed(6);
+                $('form-save').textContent = '登録';
+                $('right-title').textContent = 'カフェを追加';
+            });
+        }
+
+        function renderList() {
+            $('view-list').innerHTML = cafes.length === 0
+                ? '<p style="color:#98A2B3;font-size:0.85rem;text-align:center;padding:20px 0;">カフェを登録してください</p>'
+                : cafes.map(c => {
+                    const tags = [];
+                    if (c.wifi === true) tags.push('Wifi');
+                    if (c.power === true) tags.push('電源');
+                    if (c.parking === true) tags.push('駐車場');
+                    return `
+                        <div class="cafe-card" data-id="${c.id}">
+                            <div class="cafe-card-name">${escapeHtml(c.name)}</div>
+                            <div class="cafe-card-addr">${escapeHtml(c.address || '')}</div>
+                            ${c.comment ? `<div class="cafe-card-comment">${escapeHtml(c.comment)}</div>` : ''}
+                            ${tags.length ? `<div class="cafe-card-meta">${tags.map(t => `<span class="cafe-card-tag">${t}</span>`).join('')}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            $('view-list').querySelectorAll('.cafe-card').forEach(card => {
+                card.addEventListener('click', () => showDetail(card.dataset.id));
+            });
+        }
+
+        async function renderMarkers() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            for (const cafe of cafes) {
+                const marker = L.marker([cafe.lat, cafe.lng]).addTo(map);
+                const comments = await loadComments(cafe.id);
+                marker.bindPopup(buildPopupHtml(cafe, comments), { closeButton: true, maxWidth: 300 });
+                markers.push(marker);
+            }
+        }
+
+        async function showDetail(id) {
+            id = Number(id);
+            const cafe = cafes.find(c => c.id === id);
+            if (!cafe) return;
+            currentCafeId = id;
+            $('detail-name').textContent = cafe.name;
+            $('detail-addr').textContent = cafe.address || '';
+            $('detail-comment').textContent = cafe.comment || '';
+
+            const tags = [];
+            if (cafe.hours) tags.push(`<span class="detail-tag">${escapeHtml(cafe.hours)}</span>`);
+            if (cafe.wifi === true) tags.push('<span class="detail-tag yes">Wifi あり</span>');
+            else if (cafe.wifi === false) tags.push('<span class="detail-tag no">Wifi なし</span>');
+            if (cafe.power === true) tags.push('<span class="detail-tag yes">電源 あり</span>');
+            else if (cafe.power === false) tags.push('<span class="detail-tag no">電源 なし</span>');
+            if (cafe.parking === true) tags.push('<span class="detail-tag yes">駐車場 あり</span>');
+            else if (cafe.parking === false) tags.push('<span class="detail-tag no">駐車場 なし</span>');
+            $('detail-tags').innerHTML = tags.join('');
+
+            const likeCount = cafe.like_count || 0;
+            $('detail-like').textContent = `👍 いいね: ${likeCount}`;
+
+            const comments = await loadComments(id);
+            const commentsHtml = comments.length > 0
+                ? comments.map(c => `<div class="detail-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('')
+                : '<div class="detail-comment-item">まだコメントはありません</div>';
+            $('detail-comments').innerHTML = `
+                <div class="detail-comments-title">コメント (${comments.length})</div>
+                ${commentsHtml}
+            `;
+
+            $('left-title').textContent = cafe.name;
+            $('view-list').classList.remove('active');
+            $('view-detail').classList.add('active');
+        }
+
+        function showList() {
+            $('view-detail').classList.remove('active');
+            $('view-list').classList.add('active');
+            $('left-title').textContent = 'カフェ一覧';
+            renderList();
+        }
+
+        function openRightPanel() {
+            $('panel-right').classList.add('open');
+        }
+
+        function closeRightPanel() {
+            $('panel-right').classList.remove('open');
+            resetForm();
+        }
+
+        function resetForm() {
+            $('cafe-form').reset();
+            $('edit-id').value = '';
+            $('form-save').textContent = '登録';
+            $('right-title').textContent = 'カフェを追加';
+        }
+
+        window.editCafe = function(id) {
+            id = Number(id);
+            const cafe = cafes.find(c => c.id === id);
+            if (!cafe) return;
+            map.closePopup();
+            currentCafeId = id;
+            $('edit-id').value = id;
+            $('cafe-name').value = cafe.name;
+            $('cafe-address').value = cafe.address || '';
+            $('cafe-lat').value = cafe.lat;
+            $('cafe-lng').value = cafe.lng;
+            $('cafe-comment').value = cafe.comment || '';
+            $('cafe-hours').value = cafe.hours || '';
+            $('cafe-wifi').value = cafe.wifi === true ? 'true' : cafe.wifi === false ? 'false' : '';
+            $('cafe-power').value = cafe.power === true ? 'true' : cafe.power === false ? 'false' : '';
+            $('cafe-parking').value = cafe.parking === true ? 'true' : cafe.parking === false ? 'false' : '';
+            $('form-save').textContent = '更新';
+            $('right-title').textContent = 'カフェを編集';
+            openRightPanel();
+        };
+
+        window.deleteCafe = async function(id) {
+            id = Number(id);
+            if (!confirm('このカフェを削除してもよろしいですか？')) return;
+            map.closePopup();
+            showLoading();
+            const { error } = await supabase.from('cafes').delete().eq('id', id);
+            hideLoading();
+            if (error) { console.error('Delete error:', error); alert('削除エラー: ' + error.message); return; }
+            await supabase.from('comments').delete().eq('cafe_id', id);
+            await loadFromSupabase();
+            showList();
+        };
+
+        function toggleLeftPanel() {
+            const panel = $('panel-left');
+            const tab = $('panel-tab');
+            const toggle = $('panel-toggle');
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                tab.classList.add('visible');
+                toggle.innerHTML = '&#9654;';
+            } else {
+                panel.classList.add('open');
+                tab.classList.remove('visible');
+                toggle.innerHTML = '&#9664;';
+            }
+        }
+
+        $('panel-toggle').addEventListener('click', toggleLeftPanel);
+        $('panel-tab').addEventListener('click', toggleLeftPanel);
+
+        $('fab-add').addEventListener('click', () => {
+            map.closePopup();
+            resetForm();
+            openRightPanel();
+        });
+
+        $('right-close').addEventListener('click', closeRightPanel);
+        $('detail-back').addEventListener('click', showList);
+        $('detail-edit').addEventListener('click', () => editCafe(currentCafeId));
+        $('detail-delete').addEventListener('click', () => deleteCafe(currentCafeId));
+        $('form-cancel').addEventListener('click', closeRightPanel);
+
+        $('cafe-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = $('edit-id').value ? Number($('edit-id').value) : null;
+            const name = $('cafe-name').value.trim();
+            const address = $('cafe-address').value.trim();
+            const lat = parseFloat($('cafe-lat').value);
+            const lng = parseFloat($('cafe-lng').value);
+            const comment = $('cafe-comment').value.trim();
+            const hours = $('cafe-hours').value.trim();
+            const wifiVal = $('cafe-wifi').value;
+            const powerVal = $('cafe-power').value;
+            const parkingVal = $('cafe-parking').value;
+            const wifi = wifiVal === '' ? null : wifiVal === 'true';
+            const power = powerVal === '' ? null : powerVal === 'true';
+            const parking = parkingVal === '' ? null : parkingVal === 'true';
+            if (!name || isNaN(lat) || isNaN(lng)) return;
+
+            showLoading();
+            if (editId) {
+                const { error } = await supabase.from('cafes').update({ name, address, lat, lng, comment, hours, wifi, power, parking }).eq('id', editId);
+                if (error) { console.error('Update error:', error); }
+            } else {
+                const { error } = await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking }]);
+                if (error) { console.error('Insert error:', error); }
+            }
+            await loadFromSupabase();
+            hideLoading();
+            closeRightPanel();
+        });
+
+        initMap();
+        loadFromSupabase();
+    </script>
+</body>
+</html>
