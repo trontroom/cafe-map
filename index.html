@@ -11,19 +11,53 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; overflow: hidden; }
 
+        /* ===================== */
+        /* Login Screen          */
+        /* ===================== */
+        .login-screen { position: fixed; inset: 0; z-index: 9999; background: #F9FAFB; display: flex; align-items: center; justify-content: center; transition: opacity 0.4s, visibility 0.4s; }
+        .login-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .login-card { width: 100%; max-width: 400px; padding: 48px 40px; background: #fff; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.08); text-align: center; }
+        .login-logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .login-title { font-size: 1.5rem; font-weight: 700; color: #1D2939; margin-bottom: 4px; }
+        .login-subtitle { font-size: 0.85rem; color: #98A2B3; margin-bottom: 32px; }
+        .login-field { margin-bottom: 14px; text-align: left; }
+        .login-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+        .login-field input { width: 100%; padding: 12px 14px; border: 1.5px solid #D0D5DD; border-radius: 12px; font-size: 0.9rem; font-family: inherit; color: #1D2939; background: #F9FAFB; transition: border-color 0.2s, background 0.2s; }
+        .login-field input:focus { outline: none; border-color: #0A7AC2; background: #fff; box-shadow: 0 0 0 3px rgba(10,122,194,0.12); }
+        .login-field input::placeholder { color: #98A2B3; }
+        .login-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; font-size: 0.95rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; margin-top: 6px; }
+        .login-btn-primary { background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; box-shadow: 0 4px 16px rgba(10,122,194,0.3); }
+        .login-btn-primary:hover { box-shadow: 0 6px 24px rgba(10,122,194,0.4); transform: translateY(-1px); }
+        .login-btn-primary:active { transform: translateY(0); }
+        .login-btn-secondary { background: #1D2939; color: #fff; box-shadow: 0 4px 16px rgba(29,41,57,0.3); margin-top: 10px; }
+        .login-btn-secondary:hover { background: #344054; transform: translateY(-1px); }
+        .login-btn-secondary:active { transform: translateY(0); }
+        .login-error { font-size: 0.8rem; color: #D92D20; margin-top: 10px; min-height: 20px; }
+        .login-toggle { font-size: 0.8rem; color: #667085; margin-top: 16px; cursor: pointer; }
+        .login-toggle:hover { color: #0A7AC2; }
+        .login-toggle strong { color: #0A7AC2; }
+
+        /* ===================== */
+        /* Map App               */
+        /* ===================== */
+        .app-screen { display: none; }
+        .app-screen.active { display: block; }
+
         #header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); z-index: 1002; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 12px rgba(10,122,194,0.3); }
         #header h1 { font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
 
-        /* --- Auth Bar --- */
-        .auth-bar { display: flex; align-items: center; gap: 8px; }
-        .auth-bar input { padding: 6px 10px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 8px; font-size: 0.78rem; font-family: inherit; background: rgba(255,255,255,0.15); color: #fff; width: 150px; }
-        .auth-bar input::placeholder { color: rgba(255,255,255,0.7); }
-        .auth-bar input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,0.25); }
-        .auth-btn { padding: 6px 12px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); color: #fff; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-        .auth-btn:hover { background: rgba(255,255,255,0.3); }
-        .auth-email { color: #fff; font-size: 0.8rem; font-weight: 500; }
-        .auth-logged-in { display: none; }
-        .auth-logged-out { display: flex; }
+        /* --- User Avatar --- */
+        .user-avatar { position: relative; }
+        .avatar-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.2); color: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; text-transform: uppercase; }
+        .avatar-btn:hover { background: rgba(255,255,255,0.35); border-color: #fff; }
+        .avatar-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 220px; background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); padding: 16px; display: none; z-index: 1003; }
+        .avatar-dropdown.open { display: block; }
+        .avatar-dropdown-label { font-size: 0.7rem; font-weight: 600; color: #98A2B3; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+        .avatar-dropdown-email { font-size: 0.85rem; font-weight: 600; color: #1D2939; margin-bottom: 14px; word-break: break-all; }
+        .avatar-dropdown-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+        .avatar-dropdown-logout { background: #FEE4E2; color: #D92D20; }
+        .avatar-dropdown-logout:hover { background: #FECDCA; }
 
         #map { position: fixed; top: 52px; left: 0; width: 100%; height: calc(100% - 52px); z-index: 1; }
 
@@ -36,7 +70,6 @@
         .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 16px; border: none; background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; font-size: 28px; cursor: pointer; z-index: 1000; box-shadow: 0 4px 20px rgba(10,122,194,0.4); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; }
         .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(10,122,194,0.5); }
         .fab:active { transform: scale(0.95); }
-        .fab.hidden { display: none; }
 
         /* --- Panel Base --- */
         .panel { position: fixed; top: 12px; bottom: 12px; background: #fff; border-radius: 16px; z-index: 1001; box-shadow: 0 8px 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; }
@@ -50,11 +83,11 @@
         .panel-left { left: 12px; top: 64px; bottom: 12px; width: 340px; transform: translateX(-120%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
         .panel-left.open { transform: translateX(0); }
 
-        /* --- Panel Toggle (on panel right edge) --- */
+        /* --- Panel Toggle --- */
         .panel-toggle { position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 18px; height: 48px; background: #fff; border: none; border-radius: 0 8px 8px 0; box-shadow: 4px 0 12px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 11px; transition: all 0.2s; z-index: 10; }
         .panel-toggle:hover { background: #F0F7FF; color: #0A7AC2; }
 
-        /* --- Collapsed Tab (left edge) --- */
+        /* --- Collapsed Tab --- */
         .panel-tab { position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: 28px; height: 64px; background: #fff; border: none; border-radius: 0 10px 10px 0; box-shadow: 4px 0 16px rgba(0,0,0,0.12); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #0A7AC2; font-size: 16px; font-weight: 700; z-index: 1001; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .panel-tab.visible { opacity: 1; pointer-events: auto; }
         .panel-tab:hover { width: 32px; background: #F0F7FF; }
@@ -72,7 +105,7 @@
         .cafe-card-meta { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
         .cafe-card-tag { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: #F0F7FF; color: #0A7AC2; }
 
-        /* --- Detail (inside left panel) --- */
+        /* --- Detail --- */
         .detail-name { font-size: 1.1rem; font-weight: 700; color: #1D2939; margin-bottom: 4px; }
         .detail-addr { font-size: 0.82rem; color: #667085; margin-bottom: 10px; }
         .detail-comment { font-size: 0.85rem; color: #344054; padding: 10px 12px; background: #F0F7FF; border-radius: 10px; border-left: 3px solid #0A7AC2; margin-bottom: 12px; line-height: 1.5; }
@@ -86,7 +119,7 @@
         .detail-comment-item { font-size: 0.8rem; color: #344054; padding: 4px 0; border-bottom: 1px solid #F2F4F7; }
         .detail-comment-item strong { color: #0A7AC2; }
 
-        /* --- Form (inside right panel) --- */
+        /* --- Form --- */
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 0.72rem; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
         .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid #D0D5DD; border-radius: 10px; font-size: 0.85rem; font-family: inherit; color: #1D2939; background: #F9FAFB; transition: border-color 0.2s, background 0.2s; }
@@ -101,7 +134,6 @@
         .btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background: linear-gradient(135deg, #0A7AC2 0%, #0596D5 100%); color: #fff; box-shadow: 0 2px 8px rgba(10,122,194,0.3); }
         .btn-primary:hover { box-shadow: 0 4px 16px rgba(10,122,194,0.4); transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(0); }
         .btn-secondary { background: #F2F4F7; color: #667085; }
         .btn-secondary:hover { background: #E4E7EC; }
         .btn-danger { background: #FEE4E2; color: #D92D20; }
@@ -140,7 +172,6 @@
         .popup-btn-del:hover { background: #FECDCA; }
 
         .leaflet-control-attribution { font-size: 10px !important; }
-
         .view { display: none; }
         .view.active { display: block; }
 
@@ -148,124 +179,142 @@
             .panel-left, .panel-right { width: calc(100vw - 24px); }
             .panel-right { right: 12px; }
             .fab { bottom: 16px; right: 16px; }
-            .auth-bar input { width: 110px; }
-            .auth-bar { gap: 4px; }
+            .login-card { margin: 16px; padding: 36px 28px; }
         }
     </style>
 </head>
 <body>
-    <div id="header">
-        <h1>Cafe Map</h1>
-        <div class="auth-bar">
-            <div class="auth-logged-out" id="auth-logged-out">
-                <input type="email" id="auth-email" placeholder="メールアドレス">
-                <input type="password" id="auth-password" placeholder="パスワード">
-                <button class="auth-btn" id="btn-signup">新規登録</button>
-                <button class="auth-btn" id="btn-login">ログイン</button>
+    <!-- Login Screen -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">C</div>
+            <div class="login-title">Cafe Map</div>
+            <div class="login-subtitle">渋谷エリアのカフェを探索しよう</div>
+            <div class="login-field">
+                <label>メールアドレス</label>
+                <input type="email" id="login-email" placeholder="example@email.com">
             </div>
-            <div class="auth-logged-in" id="auth-logged-in">
-                <span class="auth-email" id="auth-display-email"></span>
-                <button class="auth-btn" id="btn-logout">ログアウト</button>
+            <div class="login-field">
+                <label>パスワード</label>
+                <input type="password" id="login-password" placeholder="6文字以上">
             </div>
-        </div>
-    </div>
-    <div id="map"></div>
-
-    <button class="panel-tab" id="panel-tab" title="一覧を展開">&#9654;</button>
-
-    <button class="fab hidden" id="fab-add" title="カフェを追加">+</button>
-
-    <!-- Left Panel: Cafe List -->
-    <div class="panel panel-left open" id="panel-left">
-        <button class="panel-toggle" id="panel-toggle" title="一覧を格納">&#9664;</button>
-        <div class="panel-header">
-            <h2 id="left-title">カフェ一覧</h2>
-        </div>
-        <div class="panel-body">
-            <div class="view active" id="view-list"></div>
-            <div class="view" id="view-detail">
-                <div class="detail-name" id="detail-name"></div>
-                <div class="detail-addr" id="detail-addr"></div>
-                <div class="detail-comment" id="detail-comment"></div>
-                <div class="detail-tags" id="detail-tags"></div>
-                <div class="detail-like" id="detail-like"></div>
-                <div class="detail-comments" id="detail-comments"></div>
-                <div class="btn-group" id="detail-btns">
-                    <button class="btn btn-secondary" id="detail-back">← 一覧</button>
-                    <button class="btn btn-primary" id="detail-edit">編集</button>
-                    <button class="btn btn-danger" id="detail-delete">削除</button>
-                </div>
-            </div>
+            <div class="login-error" id="login-error"></div>
+            <button class="login-btn login-btn-primary" id="btn-login">ログイン</button>
+            <button class="login-btn login-btn-secondary" id="btn-signup">新規アカウントを作成</button>
+            <div class="login-toggle" id="login-toggle"></div>
         </div>
     </div>
 
-    <!-- Right Panel: Add/Edit Form -->
-    <div class="panel panel-right" id="panel-right">
-        <div class="panel-header">
-            <h2 id="right-title">カフェを追加</h2>
-            <button class="panel-close" id="right-close">&times;</button>
+    <!-- Map App -->
+    <div class="app-screen" id="app-screen">
+        <div id="header">
+            <h1>Cafe Map</h1>
+            <div class="user-avatar" id="user-avatar">
+                <button class="avatar-btn" id="avatar-btn"></button>
+                <div class="avatar-dropdown" id="avatar-dropdown">
+                    <div class="avatar-dropdown-label">ログイン中</div>
+                    <div class="avatar-dropdown-email" id="dropdown-email"></div>
+                    <button class="avatar-dropdown-btn avatar-dropdown-logout" id="btn-logout">ログアウト</button>
+                </div>
+            </div>
         </div>
-        <div class="panel-body">
-            <form id="cafe-form">
-                <div class="form-group">
-                    <label>カフェ名</label>
-                    <input type="text" class="form-input" id="cafe-name" placeholder="例: スターバックス" required>
-                </div>
-                <div class="form-group">
-                    <label>住所</label>
-                    <input type="text" class="form-input" id="cafe-address" placeholder="例: 渋谷区道玄坂1-1-1">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>緯度</label>
-                        <input type="number" class="form-input" id="cafe-lat" placeholder="35.6595" step="any" required>
-                    </div>
-                    <div class="form-group">
-                        <label>経度</label>
-                        <input type="number" class="form-input" id="cafe-lng" placeholder="139.6990" step="any" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>コメント</label>
-                    <input type="text" class="form-input" id="cafe-comment" placeholder="一言コメント">
-                </div>
-                <div class="form-group">
-                    <label>営業時間</label>
-                    <input type="text" class="form-input" id="cafe-hours" placeholder="例: 9:00〜18:00">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Wifi</label>
-                        <select class="form-input" id="cafe-wifi">
-                            <option value="">不明</option>
-                            <option value="true">あり</option>
-                            <option value="false">なし</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>電源</label>
-                        <select class="form-input" id="cafe-power">
-                            <option value="">不明</option>
-                            <option value="true">あり</option>
-                            <option value="false">なし</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>駐車場</label>
-                        <select class="form-input" id="cafe-parking">
-                            <option value="">不明</option>
-                            <option value="true">あり</option>
-                            <option value="false">なし</option>
-                        </select>
+        <div id="map"></div>
+
+        <button class="panel-tab" id="panel-tab" title="一覧を展開">&#9654;</button>
+        <button class="fab" id="fab-add" title="カフェを追加">+</button>
+
+        <!-- Left Panel -->
+        <div class="panel panel-left open" id="panel-left">
+            <button class="panel-toggle" id="panel-toggle" title="一覧を格納">&#9664;</button>
+            <div class="panel-header">
+                <h2 id="left-title">カフェ一覧</h2>
+            </div>
+            <div class="panel-body">
+                <div class="view active" id="view-list"></div>
+                <div class="view" id="view-detail">
+                    <div class="detail-name" id="detail-name"></div>
+                    <div class="detail-addr" id="detail-addr"></div>
+                    <div class="detail-comment" id="detail-comment"></div>
+                    <div class="detail-tags" id="detail-tags"></div>
+                    <div class="detail-like" id="detail-like"></div>
+                    <div class="detail-comments" id="detail-comments"></div>
+                    <div class="btn-group" id="detail-btns">
+                        <button class="btn btn-secondary" id="detail-back">← 一覧</button>
+                        <button class="btn btn-primary" id="detail-edit">編集</button>
+                        <button class="btn btn-danger" id="detail-delete">削除</button>
                     </div>
                 </div>
-                <p class="form-hint">地図をクリックすると緯度・経度が自動入力されます</p>
-                <input type="hidden" id="edit-id" value="">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-secondary" id="form-cancel">キャンセル</button>
-                    <button type="submit" class="btn btn-primary" id="form-save">登録</button>
-                </div>
-            </form>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="panel panel-right" id="panel-right">
+            <div class="panel-header">
+                <h2 id="right-title">カフェを追加</h2>
+                <button class="panel-close" id="right-close">&times;</button>
+            </div>
+            <div class="panel-body">
+                <form id="cafe-form">
+                    <div class="form-group">
+                        <label>カフェ名</label>
+                        <input type="text" class="form-input" id="cafe-name" placeholder="例: スターバックス" required>
+                    </div>
+                    <div class="form-group">
+                        <label>住所</label>
+                        <input type="text" class="form-input" id="cafe-address" placeholder="例: 渋谷区道玄坂1-1-1">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>緯度</label>
+                            <input type="number" class="form-input" id="cafe-lat" placeholder="35.6595" step="any" required>
+                        </div>
+                        <div class="form-group">
+                            <label>経度</label>
+                            <input type="number" class="form-input" id="cafe-lng" placeholder="139.6990" step="any" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>コメント</label>
+                        <input type="text" class="form-input" id="cafe-comment" placeholder="一言コメント">
+                    </div>
+                    <div class="form-group">
+                        <label>営業時間</label>
+                        <input type="text" class="form-input" id="cafe-hours" placeholder="例: 9:00〜18:00">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Wifi</label>
+                            <select class="form-input" id="cafe-wifi">
+                                <option value="">不明</option>
+                                <option value="true">あり</option>
+                                <option value="false">なし</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>電源</label>
+                            <select class="form-input" id="cafe-power">
+                                <option value="">不明</option>
+                                <option value="true">あり</option>
+                                <option value="false">なし</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>駐車場</label>
+                            <select class="form-input" id="cafe-parking">
+                                <option value="">不明</option>
+                                <option value="true">あり</option>
+                                <option value="false">なし</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="form-hint">地図をクリックすると緯度・経度が自動入力されます</p>
+                    <input type="hidden" id="edit-id" value="">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="form-cancel">キャンセル</button>
+                        <button type="submit" class="btn btn-primary" id="form-save">登録</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -282,6 +331,7 @@
         let map;
         let currentCafeId = null;
         let currentUser = null;
+        let mapInitialized = false;
 
         const $ = id => document.getElementById(id);
 
@@ -308,21 +358,30 @@
             if (el) el.remove();
         }
 
-        function updateAuthUI(user) {
+        function setLoginError(msg) {
+            $('login-error').textContent = msg;
+        }
+
+        function switchToApp(user) {
             currentUser = user;
-            if (user) {
-                $('auth-logged-out').style.display = 'none';
-                $('auth-logged-in').style.display = 'flex';
-                $('auth-display-email').textContent = user.email;
-                $('fab-add').classList.remove('hidden');
-                document.querySelectorAll('.popup-btns, .popup-like, .popup-comment-form').forEach(el => el.style.display = '');
-                document.querySelectorAll('.popup-like-btn, .popup-comment-btn, .popup-btn-edit, .popup-btn-del').forEach(el => el.style.pointerEvents = '');
-            } else {
-                $('auth-logged-out').style.display = 'flex';
-                $('auth-logged-in').style.display = 'none';
-                $('auth-display-email').textContent = '';
-                $('fab-add').classList.add('hidden');
+            $('login-screen').classList.add('hidden');
+            $('app-screen').classList.add('active');
+            $('avatar-btn').textContent = user.email.charAt(0);
+            $('dropdown-email').textContent = user.email;
+            if (!mapInitialized) {
+                initMap();
+                mapInitialized = true;
             }
+            loadFromSupabase();
+        }
+
+        function switchToLogin() {
+            currentUser = null;
+            $('login-screen').classList.remove('hidden');
+            $('app-screen').classList.remove('active');
+            $('login-email').value = '';
+            $('login-password').value = '';
+            setLoginError('');
         }
 
         async function loadFromSupabase() {
@@ -393,10 +452,7 @@
             else if (cafe.parking === false) infoTags.push('<span class="popup-tag no">駐車場 なし</span>');
             const likeCount = cafe.like_count || 0;
             const commentHtml = comments.slice(0, 3).map(c => `<div class="popup-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('');
-
             const loggedIn = !!currentUser;
-            const isOwner = currentUser && cafe.user_id === currentUser.id;
-
             return `
                 <div class="popup-inner">
                     <div class="popup-name">${escapeHtml(cafe.name)}</div>
@@ -408,11 +464,7 @@
                             <button class="popup-like-btn" onclick="likeCafe('${cafe.id}')">👍 いいね</button>
                             <span class="popup-like-count">${likeCount}</span>
                         </div>
-                    ` : `
-                        <div class="popup-like">
-                            <span class="popup-like-count">👍 ${likeCount}</span>
-                        </div>
-                    `}
+                    ` : `<div class="popup-like"><span class="popup-like-count">👍 ${likeCount}</span></div>`}
                     <div class="popup-comments">
                         <div class="popup-comments-title">コメント (${comments.length})</div>
                         ${commentHtml || '<div class="popup-comment-item">まだコメントはありません</div>'}
@@ -441,9 +493,7 @@
                 attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
             }).addTo(map);
             L.control.zoom({ position: 'topright' }).addTo(map);
-
             map.on('click', function(e) {
-                if (!currentUser) return;
                 openRightPanel();
                 $('cafe-lat').value = e.latlng.lat.toFixed(6);
                 $('cafe-lng').value = e.latlng.lng.toFixed(6);
@@ -493,7 +543,6 @@
             $('detail-name').textContent = cafe.name;
             $('detail-addr').textContent = cafe.address || '';
             $('detail-comment').textContent = cafe.comment || '';
-
             const tags = [];
             if (cafe.hours) tags.push(`<span class="detail-tag">${escapeHtml(cafe.hours)}</span>`);
             if (cafe.wifi === true) tags.push('<span class="detail-tag yes">Wifi あり</span>');
@@ -503,27 +552,13 @@
             if (cafe.parking === true) tags.push('<span class="detail-tag yes">駐車場 あり</span>');
             else if (cafe.parking === false) tags.push('<span class="detail-tag no">駐車場 なし</span>');
             $('detail-tags').innerHTML = tags.join('');
-
-            const likeCount = cafe.like_count || 0;
-            $('detail-like').textContent = `👍 いいね: ${likeCount}`;
-
+            $('detail-like').textContent = `👍 いいね: ${cafe.like_count || 0}`;
             const comments = await loadComments(id);
-            const commentsHtml = comments.length > 0
-                ? comments.map(c => `<div class="detail-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('')
-                : '<div class="detail-comment-item">まだコメントはありません</div>';
             $('detail-comments').innerHTML = `
                 <div class="detail-comments-title">コメント (${comments.length})</div>
-                ${commentsHtml}
+                ${comments.length > 0 ? comments.map(c => `<div class="detail-comment-item"><strong>${escapeHtml(c.nickname)}</strong>: ${escapeHtml(c.text)}</div>`).join('') : '<div class="detail-comment-item">まだコメントはありません</div>'}
             `;
-
-            const detailBtns = $('detail-btns');
-            if (currentUser) {
-                detailBtns.style.display = '';
-            } else {
-                detailBtns.querySelector('#detail-edit').style.display = 'none';
-                detailBtns.querySelector('#detail-delete').style.display = 'none';
-            }
-
+            $('detail-btns').style.display = currentUser ? '' : 'none';
             $('left-title').textContent = cafe.name;
             $('view-list').classList.remove('active');
             $('view-detail').classList.add('active');
@@ -536,15 +571,8 @@
             renderList();
         }
 
-        function openRightPanel() {
-            $('panel-right').classList.add('open');
-        }
-
-        function closeRightPanel() {
-            $('panel-right').classList.remove('open');
-            resetForm();
-        }
-
+        function openRightPanel() { $('panel-right').classList.add('open'); }
+        function closeRightPanel() { $('panel-right').classList.remove('open'); resetForm(); }
         function resetForm() {
             $('cafe-form').reset();
             $('edit-id').value = '';
@@ -553,7 +581,6 @@
         }
 
         window.editCafe = function(id) {
-            if (!currentUser) return;
             id = Number(id);
             const cafe = cafes.find(c => c.id === id);
             if (!cafe) return;
@@ -575,14 +602,13 @@
         };
 
         window.deleteCafe = async function(id) {
-            if (!currentUser) return;
             id = Number(id);
             if (!confirm('このカフェを削除してもよろしいですか？')) return;
             map.closePopup();
             showLoading();
             const { error } = await supabase.from('cafes').delete().eq('id', id);
             hideLoading();
-            if (error) { console.error('Delete error:', error); alert('削除エラー: ' + error.message); return; }
+            if (error) { alert('削除エラー: ' + error.message); return; }
             await supabase.from('comments').delete().eq('cafe_id', id);
             await loadFromSupabase();
             showList();
@@ -593,35 +619,29 @@
             const tab = $('panel-tab');
             const toggle = $('panel-toggle');
             if (panel.classList.contains('open')) {
-                panel.classList.remove('open');
-                tab.classList.add('visible');
-                toggle.innerHTML = '&#9654;';
+                panel.classList.remove('open'); tab.classList.add('visible'); toggle.innerHTML = '&#9654;';
             } else {
-                panel.classList.add('open');
-                tab.classList.remove('visible');
-                toggle.innerHTML = '&#9664;';
+                panel.classList.add('open'); tab.classList.remove('visible'); toggle.innerHTML = '&#9664;';
             }
         }
 
         $('panel-toggle').addEventListener('click', toggleLeftPanel);
         $('panel-tab').addEventListener('click', toggleLeftPanel);
-
-        $('fab-add').addEventListener('click', () => {
-            if (!currentUser) return;
-            map.closePopup();
-            resetForm();
-            openRightPanel();
-        });
-
+        $('fab-add').addEventListener('click', () => { map.closePopup(); resetForm(); openRightPanel(); });
         $('right-close').addEventListener('click', closeRightPanel);
         $('detail-back').addEventListener('click', showList);
         $('detail-edit').addEventListener('click', () => editCafe(currentCafeId));
         $('detail-delete').addEventListener('click', () => deleteCafe(currentCafeId));
         $('form-cancel').addEventListener('click', closeRightPanel);
 
+        $('avatar-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            $('avatar-dropdown').classList.toggle('open');
+        });
+        document.addEventListener('click', () => $('avatar-dropdown').classList.remove('open'));
+
         $('cafe-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
             const editId = $('edit-id').value ? Number($('edit-id').value) : null;
             const name = $('cafe-name').value.trim();
             const address = $('cafe-address').value.trim();
@@ -629,58 +649,64 @@
             const lng = parseFloat($('cafe-lng').value);
             const comment = $('cafe-comment').value.trim();
             const hours = $('cafe-hours').value.trim();
-            const wifiVal = $('cafe-wifi').value;
-            const powerVal = $('cafe-power').value;
-            const parkingVal = $('cafe-parking').value;
-            const wifi = wifiVal === '' ? null : wifiVal === 'true';
-            const power = powerVal === '' ? null : powerVal === 'true';
-            const parking = parkingVal === '' ? null : parkingVal === 'true';
+            const wifi = $('cafe-wifi').value === '' ? null : $('cafe-wifi').value === 'true';
+            const power = $('cafe-power').value === '' ? null : $('cafe-power').value === 'true';
+            const parking = $('cafe-parking').value === '' ? null : $('cafe-parking').value === 'true';
             if (!name || isNaN(lat) || isNaN(lng)) return;
-
             showLoading();
             if (editId) {
-                const { error } = await supabase.from('cafes').update({ name, address, lat, lng, comment, hours, wifi, power, parking }).eq('id', editId);
-                if (error) { console.error('Update error:', error); }
+                await supabase.from('cafes').update({ name, address, lat, lng, comment, hours, wifi, power, parking }).eq('id', editId);
             } else {
-                const { error } = await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking, user_id: currentUser.id }]);
-                if (error) { console.error('Insert error:', error); }
+                await supabase.from('cafes').insert([{ name, address, lat, lng, comment, hours, wifi, power, parking, user_id: currentUser.id }]);
             }
             await loadFromSupabase();
             hideLoading();
             closeRightPanel();
         });
 
-        $('btn-signup').addEventListener('click', async () => {
-            const email = $('auth-email').value.trim();
-            const password = $('auth-password').value;
-            if (!email || !password) return alert('メールアドレスとパスワードを入力してください');
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) { alert('登録エラー: ' + error.message); return; }
-            alert('登録完了！確認メールが届く場合がありますが、メール確認がOFFの場合はそのままログインできます。');
+        // --- Auth ---
+        $('btn-login').addEventListener('click', async () => {
+            setLoginError('');
+            const email = $('login-email').value.trim();
+            const password = $('login-password').value;
+            if (!email || !password) { setLoginError('メールアドレスとパスワードを入力してください'); return; }
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) { setLoginError(error.message); return; }
         });
 
-        $('btn-login').addEventListener('click', async () => {
-            const email = $('auth-email').value.trim();
-            const password = $('auth-password').value;
-            if (!email || !password) return alert('メールアドレスとパスワードを入力してください');
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) { alert('ログインエラー: ' + error.message); return; }
+        $('btn-signup').addEventListener('click', async () => {
+            setLoginError('');
+            const email = $('login-email').value.trim();
+            const password = $('login-password').value;
+            if (!email || !password) { setLoginError('メールアドレスとパスワードを入力してください'); return; }
+            if (password.length < 6) { setLoginError('パスワードは6文字以上で設定してください'); return; }
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) { setLoginError(error.message); return; }
+            setLoginError('アカウントを作成しました！ログインしてください。');
         });
 
         $('btn-logout').addEventListener('click', async () => {
+            $('avatar-dropdown').classList.remove('open');
             await supabase.auth.signOut();
         });
 
+        $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
+        $('login-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
+
         supabase.auth.onAuthStateChange((event, session) => {
-            updateAuthUI(session?.user || null);
-            loadFromSupabase();
+            if (session?.user) {
+                switchToApp(session.user);
+            } else {
+                switchToLogin();
+            }
         });
 
         const { data: { session } } = await supabase.auth.getSession();
-        updateAuthUI(session?.user || null);
-
-        initMap();
-        loadFromSupabase();
+        if (session?.user) {
+            switchToApp(session.user);
+        } else {
+            switchToLogin();
+        }
     </script>
 </body>
 </html>
