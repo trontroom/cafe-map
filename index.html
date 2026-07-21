@@ -497,10 +497,13 @@
         };
 
         window.postThreadComment=async function(cafeId){
-            if(!currentUser)return;
-            const nick=$('thread-nickname').value.trim();const text=$('thread-text').value.trim();
-            if(!nick||!text)return;
-            await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,user_id:currentUser.id}]);
+            if(!currentUser){alert('ログインしてください');return}
+            const nickEl=$('thread-nickname'),textEl=$('thread-text');
+            if(!nickEl||!textEl){return}
+            const nick=nickEl.value.trim(),text=textEl.value.trim();
+            if(!nick||!text){alert('名前とメッセージを入力してください');return}
+            const{error}=await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,user_id:currentUser.id}]);
+            if(error){alert('投稿エラー: '+error.message);return}
             openThread(cafeId);
         };
 
@@ -510,10 +513,13 @@
         };
 
         window.postReply=async function(parentId,cafeId){
-            if(!currentUser)return;
-            const nick=$(`reply-nick-${parentId}`).value.trim();const text=$(`reply-text-${parentId}`).value.trim();
-            if(!nick||!text)return;
-            await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,parent_id:parentId,user_id:currentUser.id}]);
+            if(!currentUser){alert('ログインしてください');return}
+            const nickEl=$(`reply-nick-${parentId}`),textEl=$(`reply-text-${parentId}`);
+            if(!nickEl||!textEl){return}
+            const nick=nickEl.value.trim(),text=textEl.value.trim();
+            if(!nick||!text){alert('名前とメッセージを入力してください');return}
+            const{error}=await supabase.from('comments').insert([{cafe_id:cafeId,nickname:nick,text:text,parent_id:parentId,user_id:currentUser.id}]);
+            if(error){alert('投稿エラー: '+error.message);return}
             openThread(cafeId);
         };
 
